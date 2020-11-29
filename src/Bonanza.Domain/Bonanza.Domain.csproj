@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bonanza.Contracts\Bonanza.Contracts.csproj" />
+    <ProjectReference Include="..\Bonanza.Infrastructure\Bonanza.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
