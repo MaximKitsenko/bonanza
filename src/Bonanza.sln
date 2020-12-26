@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bonanza.Domain", "Bonanza.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bonanza.Contracts", "Bonanza.Contracts\Bonanza.Contracts.csproj", "{0DCE2E8D-8817-4E96-8F42-9430EBF239AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bonanza.Api", "Bonanza.Api\Bonanza.Api.csproj", "{4E8F9018-B39B-4075-9A9E-18E9B4F49D41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bonanza.Api", "Bonanza.Api\Bonanza.Api.csproj", "{4E8F9018-B39B-4075-9A9E-18E9B4F49D41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bonanza.Contracts.Tests", "Bonanza.Contracts.Tests\Bonanza.Contracts.Tests.csproj", "{0823E644-9E9F-45C8-A269-73C993895296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{4E8F9018-B39B-4075-9A9E-18E9B4F49D41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E8F9018-B39B-4075-9A9E-18E9B4F49D41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E8F9018-B39B-4075-9A9E-18E9B4F49D41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0823E644-9E9F-45C8-A269-73C993895296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0823E644-9E9F-45C8-A269-73C993895296}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0823E644-9E9F-45C8-A269-73C993895296}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0823E644-9E9F-45C8-A269-73C993895296}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

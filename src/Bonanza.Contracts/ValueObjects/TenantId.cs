@@ -1,14 +1,30 @@
 ﻿using System;
+using Bonanza.Infrastructure.Abstractions;
+using FluentAssertions;
 
 namespace Bonanza.Contracts.ValueObjects
 {
-	public class TenantId
-	{
-		public Guid Id { get; }
+	public sealed class TenantId : AbstractIdentity<long>
+    {
+        private const long SystemId = long.MaxValue - 1;
 
-		public TenantId(Guid id)
-		{
-			Id = id;
-		}
-	}
+        public override long Id { get; protected set; }
+
+        public override string GetTag()
+        {
+            return "tenant";
+        }
+
+        public static TenantId CreateSystemId()
+        {
+            return new TenantId(SystemId);
+        }
+
+        public TenantId(long id)
+        {
+            id.Should().BeGreaterThan(0, "Tried to assemble non-existent tenant");
+
+            this.Id = id;
+        }
+    }
 }
