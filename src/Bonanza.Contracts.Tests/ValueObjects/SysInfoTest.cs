@@ -1,5 +1,7 @@
 ﻿using System;
 using Bonanza.Contracts.ValueObjects;
+using Bonanza.Contracts.ValueObjects.Tenant;
+using Bonanza.Contracts.ValueObjects.User;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 

@@ -1,7 +1,7 @@
 ﻿using Bonanza.Infrastructure.Abstractions;
 using FluentAssertions;
 
-namespace Bonanza.Contracts.ValueObjects
+namespace Bonanza.Contracts.ValueObjects.User
 {
     public sealed class UserId : AbstractIdentity<long>
     {

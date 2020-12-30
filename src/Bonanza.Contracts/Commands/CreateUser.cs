@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 using Bonanza.Contracts.ValueObjects;
+using Bonanza.Contracts.ValueObjects.User;
+using Bonanza.Infrastructure;
 
 namespace Bonanza.Contracts.Commands
 {
-	class CreateUser
-    {
-        public readonly UserId UserId;
-        public readonly UserName UserName;
+	public class CreateUser : Command
+	{
+		public readonly UserId UserId;
+		public readonly UserName UserName;
 
-        public CreateUser(UserName UserName, UserId UserId)
-        {
-            UserName = UserName;
-            UserId = UserId;
-        }
-    }
+		public CreateUser(UserName userName, UserId userId)
+		{
+			this.UserName = userName;
+			this.UserId = userId;
+		}
+	}
 }

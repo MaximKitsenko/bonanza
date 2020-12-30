@@ -15,7 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bonanza.Contracts", "Bonanz
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bonanza.Api", "Bonanza.Api\Bonanza.Api.csproj", "{4E8F9018-B39B-4075-9A9E-18E9B4F49D41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bonanza.Contracts.Tests", "Bonanza.Contracts.Tests\Bonanza.Contracts.Tests.csproj", "{0823E644-9E9F-45C8-A269-73C993895296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bonanza.Contracts.Tests", "Bonanza.Contracts.Tests\Bonanza.Contracts.Tests.csproj", "{0823E644-9E9F-45C8-A269-73C993895296}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{379627F6-5D9E-4187-8B55-D4741A8E2AA8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Tasks.md = Tasks.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

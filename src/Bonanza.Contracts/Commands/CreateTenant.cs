@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Bonanza.Contracts.ValueObjects;
+using Bonanza.Contracts.ValueObjects.Tenant;
 using Bonanza.Infrastructure;
 
 namespace Bonanza.Contracts.Commands

@@ -1,6 +1,7 @@
 ﻿using System;
 using Bonanza.Contracts.Events;
 using Bonanza.Contracts.ValueObjects;
+using Bonanza.Contracts.ValueObjects.Tenant;
 using Bonanza.Infrastructure;
 
 namespace Bonanza.Domain.Aggregates
@@ -16,15 +17,26 @@ namespace Bonanza.Domain.Aggregates
 			TenantName = e.Name;
 		}
 
-		//public void ChangeName(string newName, SysInfo sysInfo)
-		//{
-		//	if (string.IsNullOrEmpty(newName)) throw new ArgumentException("newName");
-		//	this.ApplyChange(new ChatRoomRenamed(_id, newName, DebugMode ? sysInfo : SysInfo.CreateSysInfo(sysInfo.UserId)));
-		//}
+		public void Apply(TenantNameChanged e)
+		{
+			TenantId = e.Id;
+			TenantName = e.NewName;
+		}
 
+		public void ChangeName(TenantName newName, SysInfo sysInfo)
+		{
+			if (this.TenantName != null && this.TenantName.Equals(newName))
+				return;
+
+			// check there is no tenant with the same name
+
+			this.ApplyChange(new TenantNameChanged(TenantId, newName, sysInfo));
+		}
+
+		// todo: make id generic!
 		public override Guid Id
 		{
-			get { return TenantId.Id; }
+			get { return Guid.Empty; }
 		}
 
 		public Tenant()
@@ -34,7 +46,7 @@ namespace Bonanza.Domain.Aggregates
 
 		public Tenant(TenantId id, TenantName name)
 		{
-			ApplyChange(new TenantCreated(id, name, SysInfo.CreateSysInfo()));
+			ApplyChange(new TenantCreated(id, name, SysInfo.CreateSysInfo(TenantId.CreateSystemId())));
 		}
 	}
 }

@@ -1,8 +1,7 @@
-﻿using System;
-using Bonanza.Infrastructure.Abstractions;
+﻿using Bonanza.Infrastructure.Abstractions;
 using FluentAssertions;
 
-namespace Bonanza.Contracts.ValueObjects
+namespace Bonanza.Contracts.ValueObjects.Tenant
 {
 	public sealed class TenantId : AbstractIdentity<long>
     {
