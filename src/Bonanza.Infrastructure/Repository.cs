@@ -16,7 +16,7 @@ namespace Bonanza.Infrastructure
 			_storage.SaveEvents(aggregate.Id, aggregate.GetUncommittedChanges(), expectedVersion);
 		}
 
-		public T GetById(Guid id)
+		public T GetById(long id)
 		{
 			var obj = new T();//lots of ways to do this
 			var e = _storage.GetEventsForAggregate(id);

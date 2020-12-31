@@ -13,10 +13,10 @@ namespace Bonanza.Infrastructure
         {
 
             public readonly Event EventData;
-            public readonly Guid Id;
+            public readonly long Id;
             public readonly int Version;
 
-            public EventDescriptor(Guid id, Event eventData, int version)
+            public EventDescriptor(long id, Event eventData, int version)
             {
                 EventData = eventData;
                 Version = version;
@@ -29,9 +29,9 @@ namespace Bonanza.Infrastructure
             _publisher = publisher;
         }
 
-        private readonly Dictionary<Guid, List<EventDescriptor>> _current = new Dictionary<Guid, List<EventDescriptor>>();
+        private readonly Dictionary<long, List<EventDescriptor>> _current = new Dictionary<long, List<EventDescriptor>>();
 
-        public void SaveEvents(Guid aggregateId, IEnumerable<Event> events, int expectedVersion)
+        public void SaveEvents(long aggregateId, IEnumerable<Event> events, int expectedVersion)
         {
             List<EventDescriptor> eventDescriptors;
 
@@ -66,7 +66,7 @@ namespace Bonanza.Infrastructure
 
         // collect all processed events for given aggregate and return them as a list
         // used to build up an aggregate from its history (Domain.LoadsFromHistory)
-        public List<Event> GetEventsForAggregate(Guid aggregateId)
+        public List<Event> GetEventsForAggregate(long aggregateId)
         {
             List<EventDescriptor> eventDescriptors;
 

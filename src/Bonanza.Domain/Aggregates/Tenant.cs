@@ -34,9 +34,9 @@ namespace Bonanza.Domain.Aggregates
 		}
 
 		// todo: make id generic!
-		public override Guid Id
+		public override long Id
 		{
-			get { return Guid.Empty; }
+			get { return TenantId.Id; }
 		}
 
 		public Tenant()

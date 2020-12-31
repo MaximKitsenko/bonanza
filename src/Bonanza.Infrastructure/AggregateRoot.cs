@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bonanza.Infrastructure.Abstractions;
 
 namespace Bonanza.Infrastructure
 {
@@ -7,7 +8,7 @@ namespace Bonanza.Infrastructure
 	{
 		private readonly List<Event> _changes = new List<Event>();
 
-		public abstract Guid Id { get; }
+		public abstract long Id { get; }
 		public int Version { get; internal set; }
 
 		public IEnumerable<Event> GetUncommittedChanges()
