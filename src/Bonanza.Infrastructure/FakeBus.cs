@@ -50,4 +50,5 @@ namespace Bonanza.Infrastructure
 			}
 		}
 	}
+
 }

@@ -12,7 +12,7 @@ namespace Bonanza.Api.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]
-	public class WeatherForecastController : ControllerBase
+	public class TenantController : ControllerBase
 	{
 		private FakeBus _bus;
 		private ReadModelFacade _readmodel;
@@ -22,9 +22,9 @@ namespace Bonanza.Api.Controllers
 			"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 		};
 
-		private readonly ILogger<WeatherForecastController> _logger;
+		private readonly ILogger<TenantController> _logger;
 
-		public WeatherForecastController(ILogger<WeatherForecastController> logger)
+		public TenantController(ILogger<TenantController> logger)
 		{
 			_logger = logger;
 
@@ -33,16 +33,19 @@ namespace Bonanza.Api.Controllers
 		}
 
 		[HttpGet]
-		public IEnumerable<WeatherForecast> Get()
+		public List<InventoryItemListDto> Get()
 		{
-			var rng = new Random();
-			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-			{
-				Date = DateTime.Now.AddDays(index),
-				TemperatureC = rng.Next(-20, 55),
-				Summary = Summaries[rng.Next(Summaries.Length)]
-			})
-			.ToArray();
+			//var rng = new Random();
+			//return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+			//{
+			//	Date = DateTime.Now.AddDays(index),
+			//	TemperatureC = rng.Next(-20, 55),
+			//	Summary = Summaries[rng.Next(Summaries.Length)]
+			//})
+			//.ToArray();
+			var r = _readmodel.GetInventoryItems();
+
+			return r.ToList();
 		}
 
 		public List<InventoryItemListDto> Index()

@@ -10,5 +10,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bonanza.Contracts\Bonanza.Contracts.csproj" />
+    <ProjectReference Include="..\Bonanza.Infrastructure\Bonanza.Infrastructure.csproj" />
+  </ItemGroup>
+
 
 </Project>
