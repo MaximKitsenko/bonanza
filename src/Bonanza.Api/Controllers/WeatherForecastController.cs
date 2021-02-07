@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bonanza.Contracts.Commands;
+using Bonanza.Contracts.ValueObjects;
 using Bonanza.Contracts.ValueObjects.Tenant;
 using Bonanza.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,7 @@ namespace Bonanza.Api.Controllers
 		public ActionResult ChangeName(Guid id, string name, int version)
 		{
 			//var command = new RenameTenant(new TenantName(name), new TenantId(id), version);
-			var command = new RenameTenant(new TenantName(name), new TenantId(1));
+			var command = new RenameTenant(new TenantName(name), new TenantId(1), SysInfo.CreateSysInfo(TenantId.CreateSystemId()), version);
 			_bus.Send(command);
 
 			return RedirectToAction("Index");

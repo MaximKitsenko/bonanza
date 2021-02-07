@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +44,10 @@ namespace Bonanza.Api
 
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapControllers();
+				//endpoints.MapControllers();
+				endpoints.MapControllerRoute(
+					name: "default",
+					pattern: "{controller=Weather}/{action=Get}/{id?}");
 			});
 		}
 	}

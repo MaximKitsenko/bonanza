@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bonanza.Contracts.Commands;
+using Bonanza.Contracts.ValueObjects;
 using Bonanza.Contracts.ValueObjects.Tenant;
 using Bonanza.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -33,24 +34,16 @@ namespace Bonanza.Api.Controllers
 		}
 
 		[HttpGet]
-		public List<InventoryItemListDto> Get()
+		public List<TenantListDto> Get()
 		{
-			//var rng = new Random();
-			//return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-			//{
-			//	Date = DateTime.Now.AddDays(index),
-			//	TemperatureC = rng.Next(-20, 55),
-			//	Summary = Summaries[rng.Next(Summaries.Length)]
-			//})
-			//.ToArray();
-			var r = _readmodel.GetInventoryItems();
+			var r = _readmodel.GetTenants();
 
 			return r.ToList();
 		}
 
-		public List<InventoryItemListDto> Index()
+		public List<TenantListDto> Index()
 		{
-			var r = _readmodel.GetInventoryItems();
+			var r = _readmodel.GetTenants();
 
 			return r.ToList();
 		}
@@ -62,18 +55,27 @@ namespace Bonanza.Api.Controllers
 		}
 
 		[HttpPost]
-		public ActionResult Add(string name)
+		public int Add(string name)
 		{
 			_bus.Send(new CreateTenant(new TenantName(name), new TenantId(1)));
 
-			return RedirectToAction("Index");
+			return 1;
+		}
+
+		[HttpPost]
+		[Route("Create")]
+		public int Create(string name)
+		{
+			_bus.Send(new CreateTenant(new TenantName(name), new TenantId(1)));
+
+			return 1;
 		}
 
 		[HttpPost]
 		public ActionResult ChangeName(Guid id, string name, int version)
 		{
 			//var command = new RenameTenant(new TenantName(name), new TenantId(id), version);
-			var command = new RenameTenant(new TenantName(name), new TenantId(1));
+			var command = new RenameTenant(new TenantName(name), new TenantId(1), SysInfo.CreateSysInfo(TenantId.CreateSystemId()) , version);
 			_bus.Send(command);
 
 			return RedirectToAction("Index");

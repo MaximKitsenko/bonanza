@@ -37,11 +37,28 @@ namespace Bonanza.Infrastructure
 		}
 	}
 
+	public class TenantListDto
+	{
+		public Guid Id;
+		public string Name;
+
+		public TenantListDto(Guid id, string name)
+		{
+			Id = id;
+			Name = name;
+		}
+	}
+
 	public class ReadModelFacade : IReadModelFacade
 	{
 		public IEnumerable<InventoryItemListDto> GetInventoryItems()
 		{
-			return BullShitDatabase.list;
+			return BullShitDatabase.InventoryList;
+		}
+
+		public IEnumerable<TenantListDto> GetTenants()
+		{
+			return BullShitDatabase.TenantList;
 		}
 
 		public InventoryItemDetailsDto GetInventoryItemDetails(Guid id)
@@ -53,6 +70,7 @@ namespace Bonanza.Infrastructure
 	public static class BullShitDatabase
 	{
 		public static Dictionary<Guid, InventoryItemDetailsDto> details = new Dictionary<Guid, InventoryItemDetailsDto>();
-		public static List<InventoryItemListDto> list = new List<InventoryItemListDto>();
+		public static List<InventoryItemListDto> InventoryList = new List<InventoryItemListDto>();
+		public static List<TenantListDto> TenantList = new List<TenantListDto>();
 	}
 }
