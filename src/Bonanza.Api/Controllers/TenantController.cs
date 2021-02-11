@@ -64,11 +64,13 @@ namespace Bonanza.Api.Controllers
 
 		[HttpPost]
 		[Route("Create")]
-		public int Create(string name)
+		public string Create([FromBody] CreateTenantRequest createTenantRequest)
 		{
-			_bus.Send(new CreateTenant(new TenantName(name), new TenantId(1)));
 
-			return 1;
+			return createTenantRequest.Name;
+
+			_bus.Send(new CreateTenant(new TenantName(createTenantRequest.Name), new TenantId(1)));
+
 		}
 
 		[HttpPost]
@@ -80,5 +82,10 @@ namespace Bonanza.Api.Controllers
 
 			return RedirectToAction("Index");
 		}
+	}
+
+	public class CreateTenantRequest
+	{
+		public string Name;
 	}
 }
