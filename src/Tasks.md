@@ -7,3 +7,4 @@
 ## Backlog
 ## Add mechanism kinda 'CheckForProblems'
 
+# currently what we are doing - copying simple possible thing.

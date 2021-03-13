@@ -1,6 +1,6 @@
 ﻿namespace Bonanza.Infrastructure
 {
-	public interface IHandlerFor<T>
+	public interface Handles<T>
 	{
 		void Handle(T message);
 	}

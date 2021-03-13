@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bonanza.Contracts\Bonanza.Contracts.csproj" />
+    <ProjectReference Include="..\Bonanza.Domain\Bonanza.Domain.csproj" />
     <ProjectReference Include="..\Bonanza.Infrastructure\Bonanza.Infrastructure.csproj" />
   </ItemGroup>
 
