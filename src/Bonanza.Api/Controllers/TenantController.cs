@@ -15,7 +15,8 @@ namespace Bonanza.Api.Controllers
 	[Route("[controller]")]
 	public class TenantController : ControllerBase
 	{
-		private FakeBus _bus;
+		//private FakeBus _bus;
+		private ICommandSender _bus;
 		private ReadModelFacade _readmodel;
 
 		private static readonly string[] Summaries = new[]
@@ -25,11 +26,12 @@ namespace Bonanza.Api.Controllers
 
 		private readonly ILogger<TenantController> _logger;
 
-		public TenantController(ILogger<TenantController> logger)
+		public TenantController(ILogger<TenantController> logger, ICommandSender commandSender)
 		{
 			_logger = logger;
 
-			_bus = new FakeBus();
+			//_bus = new FakeBus();
+			_bus = commandSender;
 			_readmodel = new ReadModelFacade();
 		}
 
@@ -66,11 +68,8 @@ namespace Bonanza.Api.Controllers
 		[Route("Create")]
 		public string Create([FromBody] CreateTenantRequest createTenantRequest)
 		{
-
-			return createTenantRequest.Name;
-
 			_bus.Send(new CreateTenant(new TenantName(createTenantRequest.Name), new TenantId(1)));
-
+			return createTenantRequest.Name;
 		}
 
 		[HttpPost]
