@@ -14,7 +14,6 @@ namespace Bonanza.Api.Configuration
 			this IServiceCollection services)
 		{
 			var bus = new FakeBus();
-			var docWriter = new TenantsListDocumentWriter();
 			var storage = new EventStore(bus);
 			var rep = new Repository<Tenant>(storage);
 			var tenantCommandHandlers = new TenantCommandHandlers(rep);
@@ -29,7 +28,7 @@ namespace Bonanza.Api.Configuration
 			//	ServiceLifetime.Singleton);
 			//services.Add(tenantsListDocWriter);
 
-			var tenantsListProjection = new TenantsListProjection(docWriter);
+			var tenantsListProjection = new TenantsListProjection();
 			bus.RegisterHandler<TenantCreated>(tenantsListProjection.Handle);
 			bus.RegisterHandler<TenantNameChanged>(tenantsListProjection.Handle);
 			//bus.RegisterHandler<UserCreated>(detail.Handle);
