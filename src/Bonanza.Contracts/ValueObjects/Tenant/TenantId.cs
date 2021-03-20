@@ -1,4 +1,5 @@
-﻿using Bonanza.Infrastructure.Abstractions;
+﻿using System;
+using Bonanza.Infrastructure.Abstractions;
 using FluentAssertions;
 
 namespace Bonanza.Contracts.ValueObjects.Tenant
@@ -26,4 +27,16 @@ namespace Bonanza.Contracts.ValueObjects.Tenant
             this.Id = id;
         }
     }
+
+	public static class TenantIdExtensions
+	{
+		public static Guid ToGuid(this TenantId tenantId)
+		{
+			var bytes = BitConverter.GetBytes(tenantId.Id);
+			var bytesExtended = new byte[16];
+			bytes.CopyTo(bytesExtended, 0);
+			var guid = new Guid(bytesExtended);
+			return guid;
+		}
+	}
 }

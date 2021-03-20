@@ -20,4 +20,5 @@ namespace Bonanza.Contracts.Events
             SysInfo = sysInfo;
         }
     }
+
 }
