@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Bonanza.Contracts.Events;
 using Bonanza.Contracts.ValueObjects.Tenant;
@@ -10,7 +11,12 @@ namespace Bonanza.Domain.Projections.TenantsList
 		Handles<TenantCreated>,
 		Handles<TenantNameChanged>
 	{
-		readonly IDocumentWriter<TenantId, TenantsListDto> _store;
+		readonly ITenantsListDocumentWriter _store;
+
+		public TenantsListProjection(ITenantsListDocumentWriter store)
+		{
+			_store = store;
+		}
 
 		public void Handle(TenantCreated message)
 		{
@@ -23,7 +29,7 @@ namespace Bonanza.Domain.Projections.TenantsList
 		}
 	}
 
-	internal class TenantsListDto
+	public class TenantsListDto
 	{
 		public Dictionary<TenantId,TenantName> Tenants { get; }
 
@@ -45,6 +51,44 @@ namespace Bonanza.Domain.Projections.TenantsList
 		TEntity AddOrUpdate(TKey key, Func<TEntity> addFactory, Func<TEntity, TEntity> update, AddOrUpdateHint hint = AddOrUpdateHint.ProbablyExists);
 		TEntity UpdateOrThrow(TKey key, Func<TEntity, TEntity> update, AddOrUpdateHint hint = AddOrUpdateHint.ProbablyExists);
 		bool TryDelete(TKey key);
+	}
+
+	public interface ITenantsListDocumentWriter : IDocumentWriter<TenantId, TenantsListDto>
+	{
+
+	}
+
+	public class TenantsListDocumentWriter: InMemoryDocumentWriter<TenantId, TenantsListDto>, ITenantsListDocumentWriter
+	{
+
+	}
+
+	public class InMemoryDocumentWriter<TKey, TEntity> : IDocumentWriter<TKey, TEntity>
+	{
+		private static ConcurrentDictionary<TKey, TEntity> _store = new ConcurrentDictionary<TKey, TEntity>();
+
+		public TEntity Add(TKey key, Func<TEntity> addFactory)
+		{
+			var entity = addFactory();
+			_store.TryAdd(key, entity);
+			return entity;
+		}
+
+		public TEntity AddOrUpdate(TKey key, Func<TEntity> addFactory, Func<TEntity, TEntity> update, AddOrUpdateHint hint = AddOrUpdateHint.ProbablyExists)
+		{
+			var entity = _store.AddOrUpdate(key, x => addFactory(), (k, v) => update(v));
+			return entity;
+		}
+
+		public bool TryDelete(TKey key)
+		{
+			throw new NotImplementedException();
+		}
+
+		public TEntity UpdateOrThrow(TKey key, Func<TEntity, TEntity> update, AddOrUpdateHint hint = AddOrUpdateHint.ProbablyExists)
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	public enum AddOrUpdateHint
