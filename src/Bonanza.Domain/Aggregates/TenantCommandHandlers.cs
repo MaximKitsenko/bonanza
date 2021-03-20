@@ -15,7 +15,7 @@ namespace Bonanza.Domain.Aggregates
 
 		public void Handle(CreateTenant message)
 		{
-			var tenant = new Tenant(message.TenantId, message.TenantName);
+			var tenant = new Tenant(message.TenantId, message.TenantName);//create an aggregate
 			_repository.Save(tenant, -1);
 		}
 
