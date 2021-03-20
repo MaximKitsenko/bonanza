@@ -13,13 +13,13 @@ namespace Bonanza.Domain.Aggregates
 
 		public void Apply(TenantCreated e)
 		{
-			TenantId = e.Id;
-			TenantName = e.Name;
+			TenantId = e.TenantId;
+			TenantName = e.TenantName;
 		}
 
 		public void Apply(TenantNameChanged e)
 		{
-			TenantId = e.Id;
+			TenantId = e.TenantId;
 			TenantName = e.NewName;
 		}
 

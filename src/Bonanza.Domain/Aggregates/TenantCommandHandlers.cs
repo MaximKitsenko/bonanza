@@ -1,5 +1,7 @@
 ﻿using Bonanza.Contracts.Commands;
 using Bonanza.Contracts.ValueObjects;
+using Bonanza.Contracts.ValueObjects.Tenant;
+using Bonanza.Domain.Projections.TenantsList;
 using Bonanza.Infrastructure;
 
 namespace Bonanza.Domain.Aggregates
@@ -15,7 +17,8 @@ namespace Bonanza.Domain.Aggregates
 
 		public void Handle(CreateTenant message)
 		{
-			var tenant = new Tenant(message.TenantId, message.TenantName);//create an aggregate
+			var tenantLastId = BullShitDatabase.LastId.GetOrAdd(typeof(TenantId), x => 0);
+			var tenant = new Tenant(new TenantId(tenantLastId+1), message.TenantName);//create an aggregate
 			_repository.Save(tenant, -1);
 		}
 

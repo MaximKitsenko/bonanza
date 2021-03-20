@@ -28,6 +28,10 @@ namespace Bonanza.Api.Configuration
 			//	ServiceLifetime.Singleton);
 			//services.Add(tenantsListDocWriter);
 
+
+			var tenantsLastProjection = new TenantsLastIdProjection();
+			bus.RegisterHandler<TenantCreated>(tenantsLastProjection.Handle);
+
 			var tenantsListProjection = new TenantsListProjection();
 			bus.RegisterHandler<TenantCreated>(tenantsListProjection.Handle);
 			bus.RegisterHandler<TenantNameChanged>(tenantsListProjection.Handle);

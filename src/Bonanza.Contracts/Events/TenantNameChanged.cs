@@ -6,15 +6,15 @@ namespace Bonanza.Contracts.Events
 {
     public class TenantNameChanged : Event
     {
-        public TenantId Id { get; }
+        public TenantId TenantId { get; }
 
         public TenantName NewName { get; }
 
         public SysInfo SysInfo { get; }
 
-        public TenantNameChanged(TenantId id, TenantName newName, SysInfo sysInfo)
+        public TenantNameChanged(TenantId tenantId, TenantName newName, SysInfo sysInfo)
         {
-            Id = id;
+            TenantId = tenantId;
             NewName = newName;
             SysInfo = sysInfo;
         }

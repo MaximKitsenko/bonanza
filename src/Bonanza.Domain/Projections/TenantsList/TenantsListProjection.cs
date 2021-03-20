@@ -14,12 +14,12 @@ namespace Bonanza.Domain.Projections.TenantsList
 	{
 		public void Handle(TenantCreated message)
 		{
-			BullShitDatabase.TenantList.Add( new TenantListDto(message.Id.ToGuid(), message.Name.Name));
+			BullShitDatabase.TenantList.Add( new TenantListDto(message.TenantId.Id, message.TenantName.Name));
 		}
 
 		public void Handle(TenantNameChanged message)
 		{
-			var tenant = BullShitDatabase.TenantList.FirstOrDefault(x => x.Id == message.Id.ToGuid());
+			var tenant = BullShitDatabase.TenantList.FirstOrDefault(x => x.Id == message.TenantId.Id);
 			tenant.Name = message.NewName.Name;
 		}
 	}

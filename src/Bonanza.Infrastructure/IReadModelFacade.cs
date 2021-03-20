@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Bonanza.Infrastructure
@@ -39,10 +40,10 @@ namespace Bonanza.Infrastructure
 
 	public class TenantListDto
 	{
-		public Guid Id;
+		public long Id;
 		public string Name;
 
-		public TenantListDto(Guid id, string name)
+		public TenantListDto(long id, string name)
 		{
 			Id = id;
 			Name = name;
@@ -72,5 +73,6 @@ namespace Bonanza.Infrastructure
 		public static Dictionary<Guid, InventoryItemDetailsDto> details = new Dictionary<Guid, InventoryItemDetailsDto>();
 		public static List<InventoryItemListDto> InventoryList = new List<InventoryItemListDto>();
 		public static List<TenantListDto> TenantList = new List<TenantListDto>();
+		public static ConcurrentDictionary<Type,long> LastId = new ConcurrentDictionary<Type, long>();
 	}
 }
