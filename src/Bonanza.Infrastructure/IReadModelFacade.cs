@@ -7,6 +7,7 @@ namespace Bonanza.Infrastructure
 	public interface IReadModelFacade
 	{
 		IEnumerable<InventoryItemListDto> GetInventoryItems();
+		IEnumerable<TenantListDto> GetTenants();
 		InventoryItemDetailsDto GetInventoryItemDetails(Guid id);
 	}
 
@@ -52,27 +53,42 @@ namespace Bonanza.Infrastructure
 
 	public class ReadModelFacade : IReadModelFacade
 	{
+		private IBullShitDatabase _bullShitDatabase;
+
+		public ReadModelFacade(IBullShitDatabase bullShitDatabase)
+		{
+			this._bullShitDatabase = bullShitDatabase;
+		}
+
 		public IEnumerable<InventoryItemListDto> GetInventoryItems()
 		{
-			return BullShitDatabase.InventoryList;
+			return _bullShitDatabase.InventoryList;
 		}
 
 		public IEnumerable<TenantListDto> GetTenants()
 		{
-			return BullShitDatabase.TenantList;
+			return _bullShitDatabase.TenantList;
 		}
 
 		public InventoryItemDetailsDto GetInventoryItemDetails(Guid id)
 		{
-			return BullShitDatabase.details[id];
+			return _bullShitDatabase.details[id];
 		}
 	}
 
-	public static class BullShitDatabase
+	public interface IBullShitDatabase
 	{
-		public static Dictionary<Guid, InventoryItemDetailsDto> details = new Dictionary<Guid, InventoryItemDetailsDto>();
-		public static List<InventoryItemListDto> InventoryList = new List<InventoryItemListDto>();
-		public static List<TenantListDto> TenantList = new List<TenantListDto>();
-		public static ConcurrentDictionary<Type,long> LastId = new ConcurrentDictionary<Type, long>();
+		Dictionary<Guid, InventoryItemDetailsDto> details { get; }
+		List<InventoryItemListDto> InventoryList { get; }
+		List<TenantListDto> TenantList { get; }
+		ConcurrentDictionary<Type, long> LastId { get;}
+	}
+
+	public class BullShitDatabase : IBullShitDatabase
+	{
+		public Dictionary<Guid, InventoryItemDetailsDto> details { get; } = new Dictionary<Guid, InventoryItemDetailsDto>();
+		public List<InventoryItemListDto> InventoryList { get; } = new List<InventoryItemListDto>();
+		public List<TenantListDto> TenantList { get; } = new List<TenantListDto>();
+		public ConcurrentDictionary<Type,long> LastId { get; } = new ConcurrentDictionary<Type, long>();
 	}
 }

@@ -16,7 +16,7 @@ namespace Bonanza.Api.Controllers
 	public class WeatherForecastController : ControllerBase
 	{
 		private FakeBus _bus;
-		private ReadModelFacade _readmodel;
+		private IReadModelFacade _readmodel;
 
 		private static readonly string[] Summaries = new[]
 		{
@@ -25,12 +25,12 @@ namespace Bonanza.Api.Controllers
 
 		private readonly ILogger<WeatherForecastController> _logger;
 
-		public WeatherForecastController(ILogger<WeatherForecastController> logger)
+		public WeatherForecastController(ILogger<WeatherForecastController> logger, IReadModelFacade readModelFacade)
 		{
 			_logger = logger;
 
 			_bus = new FakeBus();
-			_readmodel = new ReadModelFacade();
+			_readmodel = readModelFacade;
 		}
 
 		[HttpGet]

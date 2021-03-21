@@ -17,7 +17,7 @@ namespace Bonanza.Api.Controllers
 	{
 		//private FakeBus _bus;
 		private ICommandSender _bus;
-		private ReadModelFacade _readmodel;
+		private IReadModelFacade _readModel;
 
 		private static readonly string[] Summaries = new[]
 		{
@@ -26,33 +26,33 @@ namespace Bonanza.Api.Controllers
 
 		private readonly ILogger<TenantController> _logger;
 
-		public TenantController(ILogger<TenantController> logger, ICommandSender commandSender)
+		public TenantController(ILogger<TenantController> logger, ICommandSender commandSender, IReadModelFacade readModelFacade)
 		{
 			_logger = logger;
 
 			//_bus = new FakeBus();
 			_bus = commandSender;
-			_readmodel = new ReadModelFacade();
+			_readModel = readModelFacade;
 		}
 
 		[HttpGet]
 		public List<TenantListDto> Get()
 		{
-			var r = _readmodel.GetTenants();
+			var r = _readModel.GetTenants();
 
 			return r.ToList();
 		}
 
 		public List<TenantListDto> Index()
 		{
-			var r = _readmodel.GetTenants();
+			var r = _readModel.GetTenants();
 
 			return r.ToList();
 		}
 
 		public InventoryItemDetailsDto Details(Guid id)
 		{
-			var r = _readmodel.GetInventoryItemDetails(id);
+			var r = _readModel.GetInventoryItemDetails(id);
 			return r;
 		}
 

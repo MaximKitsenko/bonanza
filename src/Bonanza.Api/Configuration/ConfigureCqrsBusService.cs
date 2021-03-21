@@ -16,7 +16,9 @@ namespace Bonanza.Api.Configuration
 			var bus = new FakeBus();
 			var storage = new EventStore(bus);
 			var rep = new Repository<Tenant>(storage);
-			var tenantCommandHandlers = new TenantCommandHandlers(rep);
+			var bulshitDB = new BullShitDatabase();
+
+			var tenantCommandHandlers = new TenantCommandHandlers(rep, bulshitDB);
 
 			bus.RegisterHandler<CreateTenant>(tenantCommandHandlers.Handle);
 			//bus.RegisterHandler<CreateUser>(commands.Handle);
@@ -29,10 +31,10 @@ namespace Bonanza.Api.Configuration
 			//services.Add(tenantsListDocWriter);
 
 
-			var tenantsLastProjection = new TenantsLastIdProjection();
+			var tenantsLastProjection = new TenantsLastIdProjection(bulshitDB);
 			bus.RegisterHandler<TenantCreated>(tenantsLastProjection.Handle);
 
-			var tenantsListProjection = new TenantsListProjection();
+			var tenantsListProjection = new TenantsListProjection(bulshitDB);
 			bus.RegisterHandler<TenantCreated>(tenantsListProjection.Handle);
 			bus.RegisterHandler<TenantNameChanged>(tenantsListProjection.Handle);
 			//bus.RegisterHandler<UserCreated>(detail.Handle);
@@ -41,15 +43,19 @@ namespace Bonanza.Api.Configuration
 				typeof(ICommandSender),
 				p => bus,
 				ServiceLifetime.Singleton);
-
 			services.Add(serviceCommandSender);
 
 			var serviceEventPublisher = new ServiceDescriptor(
 				typeof(IEventPublisher),
 				p => bus,
 				ServiceLifetime.Singleton);
-
 			services.Add(serviceEventPublisher);
+
+			var bullShitDb = new ServiceDescriptor(
+				typeof(IBullShitDatabase),
+				p => bulshitDB,
+				ServiceLifetime.Singleton);
+			services.Add(bullShitDb);
 
 			return services;
 		}

@@ -11,9 +11,15 @@ namespace Bonanza.Domain.Projections.TenantsList
 	public class TenantsLastIdProjection :
 		Handles<TenantCreated>
 	{
+		private IBullShitDatabase _bullShitDatabase;
+
+		public TenantsLastIdProjection(IBullShitDatabase bullShitDatabase)
+		{
+			_bullShitDatabase = bullShitDatabase;
+		}
 		public void Handle(TenantCreated message)
 		{
-			BullShitDatabase.LastId.AddOrUpdate(typeof(TenantId), x => message.TenantId.Id, (x, y) => message.TenantId.Id);
+			_bullShitDatabase.LastId.AddOrUpdate(typeof(TenantId), x => message.TenantId.Id, (x, y) => message.TenantId.Id);
 		}
 	}
 }
