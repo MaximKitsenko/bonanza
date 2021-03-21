@@ -17,6 +17,7 @@ namespace Bonanza.Api.Configuration
 			var storage = new EventStore(bus);
 			var rep = new Repository<Tenant>(storage);
 			var bulshitDB = new BullShitDatabase();
+			var readModelFacade = new ReadModelFacade(bulshitDB);
 
 			var tenantCommandHandlers = new TenantCommandHandlers(rep, bulshitDB);
 
@@ -56,6 +57,12 @@ namespace Bonanza.Api.Configuration
 				p => bulshitDB,
 				ServiceLifetime.Singleton);
 			services.Add(bullShitDb);
+
+			var readmodelFacade = new ServiceDescriptor(
+				typeof(IReadModelFacade),
+				p => readModelFacade,
+				ServiceLifetime.Singleton);
+			services.Add(readmodelFacade);
 
 			return services;
 		}
