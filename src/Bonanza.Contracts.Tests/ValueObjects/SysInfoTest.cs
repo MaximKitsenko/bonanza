@@ -13,60 +13,60 @@ namespace Bonanza.Contracts.Tests.ValueObjects
         [Test]
         public void GivenNotNullSysInfo_WhenCompareWithAnotherObjectOfSysInfoWithTheSameData_ThenObjectsAreEqual()
         {
-            // a
+            // arrange
             var dateTime = DateTime.UtcNow;
             var sysInfo = SysInfo.CreateSysInfo(new TenantId(2), new UserId(1), dateTime);
             var otherSysInfo = SysInfo.CreateSysInfo(new TenantId(2), new UserId(1), dateTime);
 
-            // a
+            // act
             var objectsAreEqual = sysInfo.Equals(otherSysInfo);
 
-            // a
+            // assert
             Assert.IsTrue(objectsAreEqual);
         }
 
         [Test]
         public void GivenNotNullSysInfo_WhenCompareWithAnotherObjectOfSysInfoWithDifferentTenantId_ThenObjectsAreNotEqual()
         {
-            // a
+            // arrange
             var dateTime = DateTime.UtcNow;
             var sysInfo = SysInfo.CreateSysInfo(new TenantId(2), new UserId(1), dateTime);
             var otherSysInfo = SysInfo.CreateSysInfo(new TenantId(333), new UserId(1), dateTime);
 
-            // a
+            // act
             var objectsAreEqual = sysInfo.Equals(otherSysInfo);
 
-            // a
+            // assert
             Assert.IsFalse(objectsAreEqual);
         }
 
         [Test]
         public void GivenNotNullSysInfo_WhenCompareWithAnotherObjectOfSysInfoWithDifferentUserId_ThenObjectsAreNotEqual()
         {
-            // a
+            // arrange
             var dateTime = DateTime.UtcNow;
             var sysInfo = SysInfo.CreateSysInfo(new TenantId(2), new UserId(1), dateTime);
             var otherSysInfo = SysInfo.CreateSysInfo(new TenantId(2), new UserId(333), dateTime);
 
-            // a
+            // act
             var objectsAreEqual = sysInfo.Equals(otherSysInfo);
 
-            // a
+            // assert
             Assert.IsFalse(objectsAreEqual);
         }
 
         [Test]
         public void GivenNotNullSysInfo_WhenCompareWithAnotherObjectOfSysInfoWithDifferentDateTime_ThenObjectsAreNotEqual()
         {
-            // a
+            // arrange
             var dateTime = DateTime.UtcNow;
             var sysInfo = SysInfo.CreateSysInfo(new TenantId(2), new UserId(1), dateTime);
             var otherSysInfo = SysInfo.CreateSysInfo(new TenantId(2), new UserId(1), dateTime.AddMilliseconds(1));
 
-            // a
+            // act
             var objectsAreEqual = sysInfo.Equals(otherSysInfo);
 
-            // a
+            // assert
             Assert.IsFalse(objectsAreEqual);
         }
     }

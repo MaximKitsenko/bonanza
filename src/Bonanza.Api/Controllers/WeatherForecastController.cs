@@ -70,7 +70,6 @@ namespace Bonanza.Api.Controllers
 		[HttpPost]
 		public ActionResult ChangeName(Guid id, string name, int version)
 		{
-			//var command = new RenameTenant(new TenantName(name), new TenantId(id), version);
 			var command = new RenameTenant(new TenantName(name), new TenantId(1), SysInfo.CreateSysInfo(TenantId.CreateSystemId()), version);
 			_bus.Send(command);
 

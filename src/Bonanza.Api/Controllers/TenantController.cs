@@ -15,7 +15,6 @@ namespace Bonanza.Api.Controllers
 	[Route("[controller]")]
 	public class TenantController : ControllerBase
 	{
-		//private FakeBus _bus;
 		private ICommandSender _bus;
 		private IReadModelFacade _readModel;
 
@@ -30,7 +29,6 @@ namespace Bonanza.Api.Controllers
 		{
 			_logger = logger;
 
-			//_bus = new FakeBus();
 			_bus = commandSender;
 			_readModel = readModelFacade;
 		}
@@ -75,7 +73,6 @@ namespace Bonanza.Api.Controllers
 		[HttpPost]
 		public ActionResult ChangeName(Guid id, string name, int version)
 		{
-			//var command = new RenameTenant(new TenantName(name), new TenantId(id), version);
 			var command = new RenameTenant(new TenantName(name), new TenantId(1), SysInfo.CreateSysInfo(TenantId.CreateSystemId()) , version);
 			_bus.Send(command);
 
