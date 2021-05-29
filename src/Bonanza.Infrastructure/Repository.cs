@@ -16,6 +16,11 @@ namespace Bonanza.Infrastructure
 			_storage.SaveEvents(aggregate.Id, aggregate.GetUncommittedChanges(), expectedVersion);
 		}
 
+		/// <summary>
+		/// The sequence of Events associated with a specific identity is usually referred to as an Event Stream
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
 		public T GetById(long id)
 		{
 			var obj = new T();//lots of ways to do this

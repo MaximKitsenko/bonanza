@@ -1,6 +1,6 @@
 ﻿namespace Bonanza.Infrastructure
 {
-	public interface Message
+	public interface IMessage
 	{
 		
 	}

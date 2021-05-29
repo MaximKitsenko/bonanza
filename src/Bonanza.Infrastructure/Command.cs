@@ -1,6 +1,6 @@
 ﻿namespace Bonanza.Infrastructure
 {
-	public class Command : Message
+	public class Command : IMessage
 	{
 	}
 }

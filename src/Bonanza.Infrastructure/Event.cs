@@ -1,6 +1,6 @@
 ﻿namespace Bonanza.Infrastructure
 {
-	public class Event : Message
+	public class Event : IMessage
 	{
 		public int Version;
 	}

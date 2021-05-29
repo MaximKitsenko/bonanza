@@ -6,15 +6,22 @@ namespace Bonanza.Infrastructure
 {
 	public class FakeBus : ICommandSender, IEventPublisher
 	{
-		private readonly Dictionary<Type, List<Action<Message>>> _routes = new Dictionary<Type, List<Action<Message>>>();
+		// handlers list stores both events and commands
+		// why handlers but nor handler?
+		// answer: In theory we should have 1 handler for one cmd, and many handlers for 1 evnt 
+		// since current implementation is used to store both cmd and evnts,
+		// there is no restriction here 'one type - one handler' - to allow store handlers for events
+		// we have such restriction in 'Send' method
+		private readonly Dictionary<Type, List<Action<IMessage>>> _routes = new Dictionary<Type, List<Action<IMessage>>>();
 
-		public void RegisterHandler<T>(Action<T> handler) where T : Message
+		public void RegisterHandler<T>(Action<T> handler) where T : IMessage
 		{
-			List<Action<Message>> handlers;
+			List<Action<IMessage>> handlers;
 
+			// get handlers list for type
 			if (!_routes.TryGetValue(typeof(T), out handlers))
 			{
-				handlers = new List<Action<Message>>();
+				handlers = new List<Action<IMessage>>();
 				_routes.Add(typeof(T), handlers);
 			}
 
@@ -23,11 +30,11 @@ namespace Bonanza.Infrastructure
 
 		public void Send<T>(T command) where T : Command
 		{
-			List<Action<Message>> handlers;
+			List<Action<IMessage>> handlers;
 
 			if (_routes.TryGetValue(typeof(T), out handlers))
 			{
-				if (handlers.Count != 1) throw new InvalidOperationException("cannot send to more than one handler");
+				if (handlers.Count != 1) throw new InvalidOperationException("cannot send command to more than one handler");
 				handlers[0](command);
 			}
 			else
@@ -38,7 +45,7 @@ namespace Bonanza.Infrastructure
 
 		public void Publish<T>(T @event) where T : Event
 		{
-			List<Action<Message>> handlers;
+			List<Action<IMessage>> handlers;
 
 			if (!_routes.TryGetValue(@event.GetType(), out handlers)) return;
 

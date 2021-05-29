@@ -15,8 +15,8 @@ namespace Bonanza.Api.Controllers
 	[Route("[controller]")]
 	public class TenantController : ControllerBase
 	{
-		private ICommandSender _bus;
-		private IReadModelFacade _readModel;
+		private readonly ICommandSender _bus;
+		private readonly IReadModelFacade _readModel;
 
 		private static readonly string[] Summaries = new[]
 		{
@@ -28,7 +28,6 @@ namespace Bonanza.Api.Controllers
 		public TenantController(ILogger<TenantController> logger, ICommandSender commandSender, IReadModelFacade readModelFacade)
 		{
 			_logger = logger;
-
 			_bus = commandSender;
 			_readModel = readModelFacade;
 		}

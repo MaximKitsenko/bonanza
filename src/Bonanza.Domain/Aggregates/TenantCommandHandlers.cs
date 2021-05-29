@@ -6,6 +6,11 @@ using Bonanza.Infrastructure;
 
 namespace Bonanza.Domain.Aggregates
 {
+	/// <summary>
+	/// The Command Handler effectively replaces the Application Service method,
+	/// although it is roughly equivalent and may still be referred to as such.
+	/// Implementing DDD
+	/// </summary>
 	public class TenantCommandHandlers
 	{
 		private readonly IRepository<Tenant> _repository;
@@ -20,7 +25,8 @@ namespace Bonanza.Domain.Aggregates
 		public void Handle(CreateTenant message)
 		{
 			var tenantLastId = _bullShitDatabase.LastId.GetOrAdd(typeof(TenantId), x => 0);
-			var tenant = new Tenant(new TenantId(tenantLastId+1), message.TenantName);//create an aggregate
+			//create an aggregate
+			var tenant = new Tenant(new TenantId(tenantLastId+1), message.TenantName);
 			_repository.Save(tenant, -1);
 		}
 
