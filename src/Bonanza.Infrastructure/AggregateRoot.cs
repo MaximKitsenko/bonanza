@@ -27,12 +27,15 @@ namespace Bonanza.Infrastructure
 			{
 				this.Version = e.Version;
 				// or? this.Version++;
+				// or? #1
 				ApplyChange(e, false);
 			}
 		}
 
 		protected void ApplyChange(Event @event)
 		{
+			// #1
+			// this.Version += 1;
 			ApplyChange(@event, true);
 		}
 
