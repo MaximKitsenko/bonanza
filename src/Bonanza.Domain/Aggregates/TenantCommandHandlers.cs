@@ -13,10 +13,10 @@ namespace Bonanza.Domain.Aggregates
 	/// </summary>
 	public class TenantCommandHandlers
 	{
-		private readonly IRepository<Tenant> _repository;
+		private readonly IRepository<Tenant, TenantId> _repository;
 		private IBullShitDatabase _bullShitDatabase;
 
-		public TenantCommandHandlers(IRepository<Tenant> repository, IBullShitDatabase bullShitDatabase)
+		public TenantCommandHandlers(IRepository<Tenant, TenantId> repository, IBullShitDatabase bullShitDatabase)
 		{
 			_repository = repository;
 			_bullShitDatabase = bullShitDatabase;
@@ -32,7 +32,7 @@ namespace Bonanza.Domain.Aggregates
 
 		public void Handle(RenameTenant message)
 		{
-			var item = _repository.GetById(message.TenantId.Id);
+			var item = _repository.GetById(message.TenantId);
 			item.ChangeName(message.TenantNewName, message.SysInfo);
 			_repository.Save(item, message.OriginalVersion);
 		}

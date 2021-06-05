@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bonanza.Infrastructure.Abstractions;
 
 namespace Bonanza.Infrastructure
 {
 	public interface IEventStore
 	{
-		void SaveEvents(long aggregateId, IEnumerable<Event> events, int expectedVersion);
-		List<Event> GetEventsForAggregate(long aggregateId);
+		void SaveEvents(IIdentity aggregateId, IEnumerable<Event> events, int expectedVersion);
+		List<Event> GetEventsForAggregate(IIdentity aggregateId);
 	}
 }

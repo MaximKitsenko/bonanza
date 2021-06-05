@@ -3,11 +3,12 @@ using Bonanza.Infrastructure.Abstractions;
 
 namespace Bonanza.Infrastructure
 {
-	public abstract class AggregateRoot
+	public abstract class AggregateRoot<TIdentity> 
+		where TIdentity : IIdentity
 	{
 		private readonly List<Event> _changes = new List<Event>();
 
-		public abstract long Id { get; }
+		public abstract TIdentity Id { get; }
 		public int Version { get; internal set; }
 
 		public IEnumerable<Event> GetUncommittedChanges()

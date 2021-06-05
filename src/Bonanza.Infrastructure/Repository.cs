@@ -1,8 +1,11 @@
 ﻿using System;
+using Bonanza.Infrastructure.Abstractions;
 
 namespace Bonanza.Infrastructure
 {
-	public class Repository<T> : IRepository<T> where T : AggregateRoot, new() //shortcut you can do as you see fit with new()
+	public class Repository<TAggregate, TAggregateId> : IRepository<TAggregate, TAggregateId>
+		where TAggregateId : IIdentity //shortcut you can do as you see fit with new()
+		where TAggregate : AggregateRoot<TAggregateId>, new()
 	{
 		private readonly IEventStore _storage;
 
@@ -11,7 +14,7 @@ namespace Bonanza.Infrastructure
 			_storage = storage;
 		}
 
-		public void Save(AggregateRoot aggregate, int expectedVersion)
+		public void Save(TAggregate aggregate, int expectedVersion)
 		{
 			_storage.SaveEvents(aggregate.Id, aggregate.GetUncommittedChanges(), expectedVersion);
 		}
@@ -21,9 +24,9 @@ namespace Bonanza.Infrastructure
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public T GetById(long id)
+		public TAggregate GetById(IIdentity id)
 		{
-			var obj = new T();//lots of ways to do this
+			var obj = new TAggregate();//lots of ways to do this
 			var e = _storage.GetEventsForAggregate(id);
 			obj.LoadsFromHistory(e);
 			return obj;

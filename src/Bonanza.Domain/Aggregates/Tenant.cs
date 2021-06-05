@@ -6,7 +6,7 @@ using Bonanza.Infrastructure;
 
 namespace Bonanza.Domain.Aggregates
 {
-	public class Tenant : AggregateRoot
+	public class Tenant : AggregateRoot<TenantId>
 	{
 		private TenantName TenantName;
 		private TenantId TenantId;
@@ -34,9 +34,9 @@ namespace Bonanza.Domain.Aggregates
 		}
 
 		// todo: make id generic!
-		public override long Id
+		public override TenantId Id
 		{
-			get { return TenantId.Id; }
+			get { return TenantId; }
 		}
 
 		public Tenant()

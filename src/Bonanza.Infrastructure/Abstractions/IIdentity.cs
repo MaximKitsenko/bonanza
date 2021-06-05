@@ -3,8 +3,8 @@ using System.Runtime.Serialization;
 
 namespace Bonanza.Infrastructure.Abstractions
 {
-    public interface IIdentity
-    {
+    public interface IIdentity //:IComparable
+	{
         /// <summary>
         /// Gets the id, converted to a string. Only alphanumerics and '-' are allowed.
         /// </summary>

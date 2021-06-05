@@ -1,5 +1,6 @@
 ﻿using Bonanza.Contracts.Commands;
 using Bonanza.Contracts.Events;
+using Bonanza.Contracts.ValueObjects.Tenant;
 using Bonanza.Domain.Aggregates;
 using Bonanza.Domain.Projections.TenantsList;
 using Bonanza.Infrastructure;
@@ -15,7 +16,7 @@ namespace Bonanza.Api.Configuration
 		{
 			var bus = new FakeBus();
 			var storage = new EventStore(bus);
-			var rep = new Repository<Tenant>(storage);
+			var rep = new Repository<Tenant,TenantId>(storage);
 			var bulshitDB = new BullShitDatabase();
 			var readModelFacade = new ReadModelFacade(bulshitDB);
 

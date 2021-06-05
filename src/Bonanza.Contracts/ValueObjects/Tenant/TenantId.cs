@@ -4,7 +4,7 @@ using FluentAssertions;
 
 namespace Bonanza.Contracts.ValueObjects.Tenant
 {
-	public sealed class TenantId : AbstractIdentity<long>
+	public sealed class TenantId : AbstractIdentity<long>, IIdentity
     {
         private const long SystemId = long.MaxValue - 1;
 

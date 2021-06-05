@@ -1,10 +1,13 @@
 ﻿using System;
+using Bonanza.Infrastructure.Abstractions;
 
 namespace Bonanza.Infrastructure
 {
-	public interface IRepository<T> where T : AggregateRoot, new()
+	public interface IRepository<TAggregate, TAggregateId> 
+		where TAggregateId : IIdentity
+		where TAggregate : AggregateRoot<TAggregateId>, new()
 	{
-		void Save(AggregateRoot aggregate, int expectedVersion);
-		T GetById(long id);
+		void Save(TAggregate aggregate, int expectedVersion);
+		TAggregate GetById(IIdentity id);
 	}
 }
