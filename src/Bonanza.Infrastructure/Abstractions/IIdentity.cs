@@ -1,4 +1,7 @@
-﻿namespace Bonanza.Infrastructure.Abstractions
+﻿using System;
+using System.Runtime.Serialization;
+
+namespace Bonanza.Infrastructure.Abstractions
 {
     public interface IIdentity
     {
