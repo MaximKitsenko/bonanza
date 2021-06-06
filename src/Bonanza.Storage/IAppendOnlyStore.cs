@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Bonanza.Storage
+{
+	interface IAppendOnlyStore : IDisposable
+	{
+		/// <summary>
+		/// FROM LIDDD:
+		/// Appends data to the stream with the specified name.
+		/// If <paramref name="expectedVersion"/> is supplied
+		/// and it does not match server version, then
+		/// <see cref="AppendOnlyStoreConcurrencyException"/>
+		/// is thrown.
+		/// </summary>
+		/// <param name="name">The name of the stream, to 
+		/// which data is appended</param>
+		/// <param name="data">The data to append</param>
+		/// <param name="expectedVersion">The server version 
+		/// (supply -1 to append without check).</param>
+		/// <exception cref="AppendOnlyStoreConcurrencyException">
+		/// thrown when expected server version is supplied and doesn't 
+		/// match to server version </exception>
+		void Append(
+			string name,
+			byte[] data,
+			long expectedVersion = -1);
+
+		/// <summary>
+		/// FROM LIDDD: Read records by stream name.
+		/// FROM IDDD: Read Events within a single Stream by 
+		/// their names. For rebuilding state of a single Aggregate.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="afterVersion"></param>
+		/// <param name="maxCount"></param>
+		/// <returns></returns>
+		IEnumerable<DataWithVersion> ReadRecords(
+			string name,
+			long afterVersion,
+			int maxCount);
+
+		/// <summary>
+		/// From LIDDD: Reads records across all streams.
+		/// From IDDD: Read all events in store.
+		/// Is Used by infrastructure to replicate Events, to
+		/// Publish them without the need for two phase commit,
+		/// and to rebuild persistent read models.
+		/// </summary>
+		/// <param name="afterVersion"></param>
+		/// <param name="maxCount"></param>
+		/// <returns></returns>
+		IEnumerable<DataWithName> ReadRecords(
+			int afterVersion,
+			int maxCount);
+
+		void Close();
+	}
+
+	public class DataWithVersion
+	{
+		public int Version;
+		public byte[] Data;
+	}
+
+	public sealed class DataWithName
+	{
+		public string Name;
+		public byte[] Data;
+	}
+
+	[Serializable]
+	internal class AppendOnlyStoreConcurrencyException : Exception
+	{
+		internal long ExpectedStreamVersion;
+
+		public AppendOnlyStoreConcurrencyException()
+		{
+		}
+
+		public AppendOnlyStoreConcurrencyException(string message) : base(message)
+		{
+		}
+
+		public AppendOnlyStoreConcurrencyException(string message, Exception innerException) : base(message, innerException)
+		{
+		}
+
+		protected AppendOnlyStoreConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context)
+		{
+		}
+	}
+}
