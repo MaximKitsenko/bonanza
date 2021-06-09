@@ -6,6 +6,7 @@ namespace Bonanza.Storage.Benchmark
     {
         static void Main(string[] args)
         {
+			new PgSqlEventStoreTest().SendManyEvents();
             Console.WriteLine("Hello World!");
         }
     }

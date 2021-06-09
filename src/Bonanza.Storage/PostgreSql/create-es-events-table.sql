@@ -1,8 +1,13 @@
-DROP TABLE es_events;
+CREATE DATABASE "bonanza-test-db"
+    WITH 
+    OWNER = root
+    ENCODING = 'UTF8'
+    CONNECTION LIMIT = -1;
 
-CREATE TABLE IF NOT EXISTS es_events (
-  id SERIAL,
-  name VARCHAR (50) NOT NULL,
-  version INT NOT NULL,
-  data BYTEA NOT NULL
-);
+-------------------------------------
+
+DROP TABLE es_events;
+-- dont format these lines it's space-sensitive
+CREATE TABLE IF NOT EXISTS es_events (id SERIAL,name VARCHAR (50) NOT NULL,version INT NOT NULL,data BYTEA NOT NULL);
+
+-------------------------------------

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Npgsql;
 
-namespace Bonanza.Storage.PostgrSql
+namespace Bonanza.Storage.PostgreSql
 {
 	/// <summary>
 	/// <para>This is a SQL event storage for PgSql, simplified to demonstrate 
@@ -53,9 +53,9 @@ CREATE TABLE IF NOT EXISTS ES_Events (
 				using (var tx = conn.BeginTransaction())
 				{
 					const string sql =
-						@"SELECT COALESCE(MAX(""  version""),0)
+						@"SELECT COALESCE(MAX version),0)
                             FROM public.es_events
-                            WHERE ""  name"" = 'asd';";
+                            WHERE name = 'asd';";
 					int version;
 					using (var cmd = new NpgsqlCommand(sql, conn, tx))
 					{
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS ES_Events (
 					}
 
 					const string txt =
-						   @"INSERT INTO `ES_Events` (`Name`, `Version`, `Data`) 
+						   @"INSERT INTO public.es_events (`Name`, `Version`, `Data`) 
                                 VALUES(?name, ?version, ?data)";
 
 					using (var cmd = new NpgsqlCommand(txt, conn, tx))
@@ -88,12 +88,57 @@ CREATE TABLE IF NOT EXISTS ES_Events (
 
 		public IEnumerable<DataWithVersion> ReadRecords(string name, long afterVersion, int maxCount)
 		{
-			throw new System.NotImplementedException();
+			using (var conn = new NpgsqlConnection(_connectionString))
+			{
+				conn.Open();
+				const string sql =
+					@"SELECT `Data`, `Version` FROM `ES_Events`
+                        WHERE `Name` = ?name AND `Version`>?version
+                        ORDER BY `Version`
+                        LIMIT 0,?take";
+				using (var cmd = new NpgsqlCommand(sql, conn))
+				{
+					cmd.Parameters.AddWithValue("?name", name);
+					cmd.Parameters.AddWithValue("?version", afterVersion);
+					cmd.Parameters.AddWithValue("?take", maxCount);
+					using (var reader = cmd.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							var data = (byte[])reader["Data"];
+							var version = (int)reader["Version"];
+							yield return new DataWithVersion(version, data);
+						}
+					}
+				}
+			}
 		}
 
 		public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
 		{
-			throw new System.NotImplementedException();
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                const string sql =
+					@"SELECT Data, Name FROM ES_Events
+                        WHERE Id>@after
+                        ORDER BY Id
+                        LIMIT @take OFFSET 0";
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@after", afterVersion);
+                    cmd.Parameters.AddWithValue("@take", maxCount);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var data = (byte[])reader["Data"];
+                            var name = (string)reader["Name"];
+                            yield return new DataWithName(name, data);
+                        }
+                    }
+                }
+            }
 		}
 
 		public void Close()

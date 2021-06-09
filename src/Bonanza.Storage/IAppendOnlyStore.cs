@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Bonanza.Storage
@@ -62,12 +63,24 @@ namespace Bonanza.Storage
 	{
 		public int Version;
 		public byte[] Data;
+
+		public DataWithVersion(in int version, byte[] data)
+		{
+			Version = version;
+			Data = data;
+		}
 	}
 
 	public sealed class DataWithName
 	{
 		public string Name;
 		public byte[] Data;
+
+		public DataWithName(string name, byte[] data)
+		{
+			Name = name;
+			Data = data;
+		}
 	}
 
     /// <summary>
