@@ -53,13 +53,13 @@ CREATE TABLE IF NOT EXISTS ES_Events (
 				using (var tx = conn.BeginTransaction())
 				{
 					const string sql =
-						@"SELECT COALESCE(MAX version),0)
+						@"SELECT COALESCE (MAX(version),0)
                             FROM public.es_events
-                            WHERE name = 'asd';";
+                            WHERE name = @name;";
 					int version;
 					using (var cmd = new NpgsqlCommand(sql, conn, tx))
 					{
-						cmd.Parameters.AddWithValue("?name", name);
+						cmd.Parameters.AddWithValue("@name", name);
 						version = (int)cmd.ExecuteScalar();
 						if (expectedVersion != -1)
 						{
@@ -71,14 +71,14 @@ CREATE TABLE IF NOT EXISTS ES_Events (
 					}
 
 					const string txt =
-						   @"INSERT INTO public.es_events (`Name`, `Version`, `Data`) 
-                                VALUES(?name, ?version, ?data)";
+						   @"INSERT INTO public.es_events (Name,Version,Data) 
+                                VALUES(@name, @version, @data)";
 
 					using (var cmd = new NpgsqlCommand(txt, conn, tx))
 					{
-						cmd.Parameters.AddWithValue("?name", name);
-						cmd.Parameters.AddWithValue("?version", version + 1);
-						cmd.Parameters.AddWithValue("?data", data);
+						cmd.Parameters.AddWithValue("@name", name);
+						cmd.Parameters.AddWithValue("@version", version + 1);
+						cmd.Parameters.AddWithValue("@data", data);
 						cmd.ExecuteNonQuery();
 					}
 					tx.Commit();

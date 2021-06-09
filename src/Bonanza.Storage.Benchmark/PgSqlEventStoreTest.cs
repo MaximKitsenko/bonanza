@@ -13,6 +13,11 @@ namespace Bonanza.Storage.Benchmark
 			var eventStore = new Bonanza.Storage.PostgreSql.PgSqlEventStore(connectionString);
 			var res = eventStore.ReadRecords(0, 1000).ToList();
 
+			var data = new byte[]{1,2,3,4,5,6};
+			eventStore.Append("Tenant-1", data,0);
+
+			var res2 = eventStore.ReadRecords(0, 1000).ToList();
+
 		}
 	}
 }
