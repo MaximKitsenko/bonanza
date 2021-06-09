@@ -92,10 +92,10 @@ CREATE TABLE IF NOT EXISTS ES_Events (
 			{
 				conn.Open();
 				const string sql =
-					@"SELECT `Data`, `Version` FROM `ES_Events`
-                        WHERE `Name` = ?name AND `Version`>?version
-                        ORDER BY `Version`
-                        LIMIT 0,?take";
+					@"SELECT Data,Version FROM ES_Events
+                        WHERE Name = @name AND version>@version
+                        ORDER BY version
+                        LIMIT @take OFFSET 0";
 				using (var cmd = new NpgsqlCommand(sql, conn))
 				{
 					cmd.Parameters.AddWithValue("?name", name);
