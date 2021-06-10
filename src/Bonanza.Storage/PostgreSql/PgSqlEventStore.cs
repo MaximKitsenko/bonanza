@@ -37,7 +37,7 @@ RETURNS int AS
 $$ -- here start procedural part
    DECLARE currentVer int;
    BEGIN
-		SELECT INTO currentVer COALESCE(MAX(version),0)
+		SELECT INTO currentVer COALESCE(MAX(version),-1)
 				FROM public.es_events
 				WHERE name = aggregateName;
 		IF expectedVersion <> -1 THEN
@@ -46,7 +46,8 @@ $$ -- here start procedural part
 			END IF;
 		END IF;
 		INSERT INTO public.es_events (Name,Version,Data) VALUES(aggregateName,currentVer+1,data);
-		RETURN 0;
+				RETURN currentVer;
+				--RETURN 0;
    END;
 $$ -- here finish procedural part
 LANGUAGE plpgsql; -- language specification ";
