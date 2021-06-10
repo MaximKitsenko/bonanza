@@ -57,6 +57,12 @@ namespace Bonanza.Storage
 			int maxCount);
 
 		void Close();
+
+		void Append(
+			string name, 
+			byte[] data, 
+			long expectedVersion, 
+			bool cacheConnection);
 	}
 
 	public class DataWithVersion

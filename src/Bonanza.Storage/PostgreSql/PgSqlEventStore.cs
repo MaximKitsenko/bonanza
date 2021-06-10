@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Npgsql;
 
 namespace Bonanza.Storage.PostgreSql
@@ -13,10 +14,12 @@ namespace Bonanza.Storage.PostgreSql
 	public sealed class PgSqlEventStore : IAppendOnlyStore
 	{
 		readonly string _connectionString;
+		private ConcurrentQueue<NpgsqlConnection> _connections;
 
 		public PgSqlEventStore(string connectionString)
 		{
 			_connectionString = connectionString;
+			_connections = new ConcurrentQueue<NpgsqlConnection>();
 
 		}
 
@@ -45,7 +48,7 @@ CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalo
 
 		}
 
-		public void Append(string name, byte[] data, long expectedVersion)
+		public void Append(string name, byte[] data, long expectedVersion = -1)
 		{
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
@@ -84,6 +87,88 @@ CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalo
 					tx.Commit();
 				}
 			}
+		}
+
+		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection)
+		{
+			if (cacheConnection)
+			{
+				NpgsqlConnection conn = null;
+				try
+				{
+					conn = GetFromCacheOrNew();
+					Append(name, data, expectedVersion, conn);
+				}
+				finally
+				{
+					if (conn !=  null)
+					{
+						_connections.Enqueue(conn);
+					}
+				}
+			}
+			else
+			{
+				using (var conn = new NpgsqlConnection(_connectionString))
+				{
+					conn.Open();
+					Append(name, data, expectedVersion, conn);
+				}
+			}
+		}
+
+		public void Append(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		{
+			using (var tx = conn.BeginTransaction())
+			{
+				const string sql =
+					@"SELECT COALESCE (MAX(version),0)
+                            FROM public.es_events
+                            WHERE name = @name;";
+				int version;
+				using (var cmd = new NpgsqlCommand(sql, conn, tx))
+				{
+					cmd.Parameters.AddWithValue("@name", name);
+					version = (int) cmd.ExecuteScalar();
+					if (expectedVersion != -1)
+					{
+						if (version != expectedVersion)
+						{
+							throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
+						}
+					}
+				}
+
+				const string txt =
+					@"INSERT INTO public.es_events (Name,Version,Data) 
+                                VALUES(@name, @version, @data)";
+
+				using (var cmd = new NpgsqlCommand(txt, conn, tx))
+				{
+					cmd.Parameters.AddWithValue("@name", name);
+					cmd.Parameters.AddWithValue("@version", version + 1);
+					cmd.Parameters.AddWithValue("@data", data);
+					cmd.ExecuteNonQuery();
+				}
+
+				tx.Commit();
+			}
+		}
+
+		private NpgsqlConnection GetFromCacheOrNew()
+		{
+			NpgsqlConnection conn;
+			if (_connections.TryDequeue(out var temp))
+			{
+				conn = temp;
+			}
+			else
+			{
+				conn = new NpgsqlConnection(_connectionString);
+				conn.Open();
+			}
+
+			return conn;
 		}
 
 		public IEnumerable<DataWithVersion> ReadRecords(string name, long afterVersion, int maxCount)
