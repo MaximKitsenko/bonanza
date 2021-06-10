@@ -61,10 +61,10 @@ namespace Bonanza.Storage.Benchmark
 
 		public void RunMany()
 		{
-			var testSet1 = PgSqlEventStoreTestData.Generate(1_0, "Tenant", 1_000_000, true, DataSizeEnum._1KByte);
-			var testSet2 = PgSqlEventStoreTestData.Generate(1_0, "Order", 1_000_000, false, DataSizeEnum._1KByte);
-			var testSet3 = PgSqlEventStoreTestData.Generate(1_0, "Call", 1_000_000, false, DataSizeEnum._1KByte);
-			var testSet4 = PgSqlEventStoreTestData.Generate(1_0, "Dish", 1_000_000, false, DataSizeEnum._1KByte);
+			var testSet1 = PgSqlEventStoreTestData.Generate(1_0, "Tenant", 25_000_000, true, DataSizeEnum._1KByte);
+			var testSet2 = PgSqlEventStoreTestData.Generate(1_0, "Order", 25_000_000, false, DataSizeEnum._1KByte);
+			var testSet3 = PgSqlEventStoreTestData.Generate(1_0, "Call", 25_000_000, false, DataSizeEnum._1KByte);
+			var testSet4 = PgSqlEventStoreTestData.Generate(1_0, "Dish", 25_000_000, false, DataSizeEnum._1KByte);
 			var testCases = new List<PgSqlEventStoreTestData>(){ testSet1, testSet2, testSet3, testSet4};
 
 			var connectionString = "Host=localhost;Database=bonanza-test-db;Username=root;Password=root";
