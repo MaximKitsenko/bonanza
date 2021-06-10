@@ -42,7 +42,7 @@ $$ -- here start procedural part
 				WHERE name = aggregateName;
 		IF expectedVersion <> -1 THEN
 			IF currentVer <> expectedVersion THEN
-				RETURN 7;
+				RETURN currentVer;
 			END IF;
 		END IF;
 		INSERT INTO public.es_events (Name,Version,Data) VALUES(aggregateName,currentVer+1,data);
