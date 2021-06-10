@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
+using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Toolchains.Results;
+using Bonanza.Storage.Benchmark.TestData;
 
 namespace Bonanza.Storage.Benchmark
 {
@@ -32,7 +36,7 @@ namespace Bonanza.Storage.Benchmark
 			aggregatesIds = Enumerable
 				.Range(1, 1_000_000)
 				.Select(x => "Tenant-" + x)
-				.ToDictionary(x => x, y => new AggregateNameAndVersion {name = y, version = -1});
+				.ToDictionary(x => x, y => new AggregateNameAndVersion (y, -1));
 		}
 
 		[Benchmark]
@@ -63,18 +67,5 @@ namespace Bonanza.Storage.Benchmark
 				}
 			}
 		}
-	}
-
-	public class AggregateNameAndVersion
-	{
-		public string name { get; set; }
-		public int version { get; set; }
-	}
-
-	public enum DataSizeEnum
-	{
-		_1KByte = 0,
-		_10KBytes = 1,
-		_100KBytes = 2,
 	}
 }
