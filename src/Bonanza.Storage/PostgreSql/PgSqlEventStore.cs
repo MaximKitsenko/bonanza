@@ -20,20 +20,18 @@ namespace Bonanza.Storage.PostgreSql
 
 		}
 
-		public void Initialize()
+		public void Initialize(bool dropDb)
 		{
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
 				conn.Open();
 
-				const string txt = @"
-CREATE TABLE IF NOT EXISTS ES_Events (
-  Id SERIAL,
-  Name VARCHAR (50) NOT NULL,
-  Version INT NOT NULL,
-  Data BYTEA NOT NULL
-)";
-				using (var cmd = new NpgsqlCommand(txt, conn))
+				const string createTableSql = @"
+CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL)";
+				const string dropTableCreateTableSql = @"
+DROP TABLE es_events;
+CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
+				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
 				{
 					cmd.ExecuteNonQuery();
 				}
