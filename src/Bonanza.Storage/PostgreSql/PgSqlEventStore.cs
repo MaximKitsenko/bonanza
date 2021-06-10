@@ -27,10 +27,12 @@ namespace Bonanza.Storage.PostgreSql
 				conn.Open();
 
 				const string createTableSql = @"
-CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL)";
+CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL)
+CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string dropTableCreateTableSql = @"
 DROP TABLE es_events;
-CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
+CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);
+CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
 				{
 					cmd.ExecuteNonQuery();
