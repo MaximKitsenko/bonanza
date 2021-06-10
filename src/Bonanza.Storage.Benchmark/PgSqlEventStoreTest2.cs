@@ -32,13 +32,13 @@ namespace Bonanza.Storage.Benchmark
 							eventStore.Append(aggregatesId.Key, testData.Data, testData.AggregateIds[aggregatesId.Key].version++, true);
 							eventsStored++;
 
-							if (eventsStored != 0 && eventsStored % 100 == 0)
-							{
-								var time = sw2.ElapsedMilliseconds + 1;
-								var perf = (int)((1000 * 1_00.0) / time);
-								Console.WriteLine("Thread-{0}, {1:D10} events processed, speed: {2:D10} appends/sec", System.Threading.Thread.CurrentThread.ManagedThreadId, eventsStored, perf);
-								sw2.Restart();
-							}
+							//if (eventsStored != 0 && eventsStored % 100 == 0)
+							//{
+							//	var time = sw2.ElapsedMilliseconds + 1;
+							//	var perf = (int)((1000 * 1_00.0) / time);
+							//	Console.WriteLine("Thread-{0}, {1:D10} events processed, speed: {2:D10} appends/sec", System.Threading.Thread.CurrentThread.ManagedThreadId, eventsStored, perf);
+							//	sw2.Restart();
+							//}
 
 							if (eventsStored != 0 && eventsStored % 1000 == 0)
 							{
