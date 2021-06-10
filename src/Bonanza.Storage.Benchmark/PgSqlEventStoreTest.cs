@@ -41,7 +41,7 @@ namespace Bonanza.Storage.Benchmark
 			Console.WriteLine("qwe2");
 			var connectionString = "Host=localhost;Database=bonanza-test-db;Username=root;Password=root";
 			var eventStore = new PostgreSql.PgSqlEventStore(connectionString);
-			eventStore.Initialize(true);
+			//eventStore.Initialize(true);
 			var eventsStored = -1;
 			var sw = new Stopwatch();
 			sw.Start();
@@ -53,10 +53,10 @@ namespace Bonanza.Storage.Benchmark
 					eventStore.Append(aggregatesId.Key, data[(int)DataSize], aggregatesIds[aggregatesId.Key].version++);
 					//aggregatesIds[aggregatesId.Key] = aggregatesIds[aggregatesId.Key] + 1;
 					eventsStored++;
-					if (eventsStored % 1000 == 1)
+					if (eventsStored % 1000 == 0)
 					{
 						var time = sw.ElapsedMilliseconds+1;
-						var perf = (int)(1_000.0 / time);
+						var perf = (int)((1000 * 1_000.0) / time);
 						Console.WriteLine("{0:D10} events processed, speed: {1:D10} appends/sec", eventsStored, perf);
 						sw.Restart();
 					}

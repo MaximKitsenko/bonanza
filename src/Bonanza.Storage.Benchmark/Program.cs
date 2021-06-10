@@ -12,7 +12,7 @@ namespace Bonanza.Storage.Benchmark
 
 			var test = new PgSqlEventStoreTest();
 			test.DataSize = DataSizeEnum._1KByte;
-			test.EventsCount = 2000;
+			test.EventsCount = 100000;
 			test.SendManyEvents();
 		}
     }
