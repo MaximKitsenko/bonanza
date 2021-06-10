@@ -1,5 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using Npgsql;
 
 namespace Bonanza.Storage.PostgreSql
@@ -15,6 +18,8 @@ namespace Bonanza.Storage.PostgreSql
 	{
 		readonly string _connectionString;
 		private ConcurrentQueue<NpgsqlConnection> _connections;
+		private int appendCount = 0;
+		private Stopwatch sw = Stopwatch.StartNew();
 
 		public PgSqlEventStore(string connectionString)
 		{
@@ -172,6 +177,11 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 				*/
 				tx.Commit();
+				if (Interlocked.Increment(ref appendCount) % 1000 ==0)
+				{
+					Console.WriteLine("[ EventStore ] Events appended {0:D5}, speed:  {1:F1}", appendCount, 1000.0*1000/(sw.ElapsedMilliseconds+1.0));
+					sw.Restart();
+				}
 			}
 		}
 
