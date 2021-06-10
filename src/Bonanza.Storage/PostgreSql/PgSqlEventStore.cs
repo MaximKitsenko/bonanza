@@ -122,13 +122,25 @@ CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalo
 			using (var tx = conn.BeginTransaction())
 			{
 				const string sql =
-					@"SELECT COALESCE (MAX(version),0)
-                            FROM public.es_events
-                            WHERE name = @name;";
+					@"--DO $$
+					--DECLARE currentVer integer --;
+					--BEGIN
+						SELECT INTO currentVer COALESCE (MAX(version),0)
+						        FROM public.es_events
+						        WHERE name = @name;
+								IF currentVer = @expectedVersion THEN
+								    --INSERT INTO public.es_events (Name,Version,Data) VALUES(@name, @version, @data);
+									RETURN NEXT 0
+								ELSE
+									RETURN NEXT 1
+								END IF;
+					--END $$;";
+
 				int version;
 				using (var cmd = new NpgsqlCommand(sql, conn, tx))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
+					cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
 					version = (int) cmd.ExecuteScalar();
 					if (expectedVersion != -1)
 					{
@@ -138,7 +150,7 @@ CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalo
 						}
 					}
 				}
-
+				/*
 				const string txt =
 					@"INSERT INTO public.es_events (Name,Version,Data) 
                                 VALUES(@name, @version, @data)";
@@ -150,7 +162,7 @@ CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalo
 					cmd.Parameters.AddWithValue("@data", data);
 					cmd.ExecuteNonQuery();
 				}
-
+				*/
 				tx.Commit();
 			}
 		}
