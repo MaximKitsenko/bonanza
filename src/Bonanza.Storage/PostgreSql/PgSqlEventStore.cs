@@ -28,13 +28,11 @@ namespace Bonanza.Storage.PostgreSql
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
 				conn.Open();
-
-				const string createTableSql = @"
-CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL)
-
-CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;
-
-CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion integer, aggregateName varchar(50))
+				const string dropTable = @"DROP TABLE es_events;";
+				const string createTable = @"CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
+				const string createIdx = @"CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createFunction = @"
+CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text)
 RETURNS int AS 
 $$ -- here start procedural part
    DECLARE currentVer int;
@@ -42,39 +40,20 @@ $$ -- here start procedural part
 		SELECT INTO currentVer COALESCE(MAX(version),0)
 				FROM public.es_events
 				WHERE name = aggregateName;
-				IF currentVer = expectedVersion THEN
-					--INSERT INTO public.es_events (Name,Version,Data) VALUES(@name, @version, @data);
-					RETURN 0;
-				ELSE
-					RETURN 1;
-				END IF;
+		IF expectedVersion <> -1 THEN
+			IF currentVer <> expectedVersion THEN
+				RETURN 7;
+			END IF;
+		END IF;
+		--INSERT INTO public.es_events (Name,Version,Data) VALUES(@name, @version, @data);
+		RETURN 0;
    END;
 $$ -- here finish procedural part
 LANGUAGE plpgsql; -- language specification ";
-				const string dropTableCreateTableSql = @"
-DROP TABLE es_events;
 
-CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);
+				const string createTableSql = createTable + createIdx + createFunction;
+				const string dropTableCreateTableSql = dropTable + createTable + createIdx + createFunction;
 
-CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;
-
-CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion integer, aggregateName varchar(50))
-RETURNS int AS 
-$$ -- here start procedural part
-   DECLARE currentVer int;
-   BEGIN
-		SELECT INTO currentVer COALESCE(MAX(version),0)
-				FROM public.es_events
-				WHERE name = aggregateName;
-				IF currentVer = expectedVersion THEN
-					--INSERT INTO public.es_events (Name,Version,Data) VALUES(@name, @version, @data);
-					RETURN 0;
-				ELSE
-					RETURN 1;
-				END IF;
-   END;
-$$ -- here finish procedural part
-LANGUAGE plpgsql; -- language specification ";
 				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
 				{
 					cmd.ExecuteNonQuery();
