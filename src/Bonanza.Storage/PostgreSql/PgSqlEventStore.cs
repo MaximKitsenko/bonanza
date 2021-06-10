@@ -32,7 +32,7 @@ namespace Bonanza.Storage.PostgreSql
 				const string createTable = @"CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
-CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text)
+CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
 $$ -- here start procedural part
    DECLARE currentVer int;
@@ -45,7 +45,7 @@ $$ -- here start procedural part
 				RETURN 7;
 			END IF;
 		END IF;
-		--INSERT INTO public.es_events (Name,Version,Data) VALUES(@name, @version, @data);
+		INSERT INTO public.es_events (Name,Version,Data) VALUES(aggregateName,currentVer+1,data);
 		RETURN 0;
    END;
 $$ -- here finish procedural part
@@ -140,13 +140,14 @@ LANGUAGE plpgsql; -- language specification ";
 			using (var tx = conn.BeginTransaction())
 			{
 				const string sql =
-					@"SELECT appendevent(@expectedVersion, @name)";
+					@"SELECT appendevent(@expectedVersion,@name,@data)";
 
 				int version;
 				using (var cmd = new NpgsqlCommand(sql, conn, tx))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
 					cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
+					cmd.Parameters.AddWithValue("@data", data);
 					version = (int) cmd.ExecuteScalar();
 					if (expectedVersion != -1)
 					{
