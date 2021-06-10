@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using BenchmarkDotNet.Attributes;
@@ -42,13 +43,23 @@ namespace Bonanza.Storage.Benchmark
 			var eventStore = new PostgreSql.PgSqlEventStore(connectionString);
 			eventStore.Initialize(true);
 			var eventsStored = -1;
-			while (eventsStored<EventsCount)
+			var sw = new Stopwatch();
+			sw.Start();
+			using (var enumerator = aggregatesIds.GetEnumerator())
 			{
-				foreach (var aggregatesId in aggregatesIds)
+				while (enumerator.MoveNext() && eventsStored < EventsCount)
 				{
+					var aggregatesId = enumerator.Current;
 					eventStore.Append(aggregatesId.Key, data[(int)DataSize], aggregatesIds[aggregatesId.Key].version++);
 					//aggregatesIds[aggregatesId.Key] = aggregatesIds[aggregatesId.Key] + 1;
 					eventsStored++;
+					if (eventsStored % 1000 == 1)
+					{
+						var time = sw.ElapsedMilliseconds+1;
+						var perf = (int)(1_000.0 / time);
+						Console.WriteLine("{0:D10} events processed, speed: {1:D10} appends/sec", eventsStored, perf);
+						sw.Restart();
+					}
 				}
 			}
 		}
