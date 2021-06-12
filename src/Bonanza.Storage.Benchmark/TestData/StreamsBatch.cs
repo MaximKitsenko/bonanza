@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace Bonanza.Storage.Benchmark.TestData
 {
-	public class TestCase
+	public class StreamsBatch
 	{
 		public Dictionary<string, StreamNameAndVersion> Streams { get; }
 		public int StreamMaxVer { get; }
 		public bool InitDb { get; }
 		public byte[] Data { get; }
 
-		public TestCase(
+		public StreamsBatch(
 			Dictionary<string, StreamNameAndVersion> streams, 
 			int streamMaxVer, 
 			bool initDb, 
@@ -24,7 +24,7 @@ namespace Bonanza.Storage.Benchmark.TestData
 		}
 
 
-		public static TestCase Generate(
+		public static StreamsBatch Generate(
 			int streamsCount, 
 			string streamNamePrefix,
 			int streamMaxVersion,
@@ -40,7 +40,7 @@ namespace Bonanza.Storage.Benchmark.TestData
 				x => streamNamePrefix+"-" + x,
 				y => new StreamNameAndVersion(streamNamePrefix+"-" + y, -1));
 
-			return new TestCase(streams, streamMaxVersion, initDb, dataDummy);
+			return new StreamsBatch(streams, streamMaxVersion, initDb, dataDummy);
 		}
 	}
 }

@@ -28,7 +28,7 @@ namespace Bonanza.Storage.PostgreSql
 
 		}
 
-		public void Initialize(bool dropDb)
+		public PgSqlEventStore Initialize(bool dropDb)
 		{
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
@@ -72,6 +72,8 @@ LANGUAGE plpgsql; -- language specification ";
 					cmd.ExecuteNonQuery();
 				}
 			}
+
+			return this;
 		}
 
 		public void Dispose()
