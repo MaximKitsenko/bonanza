@@ -17,6 +17,8 @@ namespace Bonanza.Storage.Benchmark
 
 			var test2 = new PgSqlEventStoreTest2();
 			test2.RunMany2();
+			Console.WriteLine("Press Enter for pause. ");
+			Console.ReadLine();
 		}
     }
 }

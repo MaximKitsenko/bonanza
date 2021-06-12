@@ -15,7 +15,7 @@ namespace Bonanza.Storage.Benchmark
 	public class PgSqlEventStoreTest
 	{
 		private byte[][] data = new byte[3][];
-		private Dictionary<string, AggregateNameAndVersion> aggregatesIds;
+		private Dictionary<string, StreamNameAndVersion> aggregatesIds;
 		//private static long eventsStored = 0;
 
 		//[Params(1000, 10_000, 100_000, 1_000_000, 10_000_000)]
@@ -36,7 +36,7 @@ namespace Bonanza.Storage.Benchmark
 			aggregatesIds = Enumerable
 				.Range(1, 1_000_000)
 				.Select(x => "Tenant-" + x)
-				.ToDictionary(x => x, y => new AggregateNameAndVersion (y, -1));
+				.ToDictionary(x => x, y => new StreamNameAndVersion (y, -1));
 		}
 
 		[Benchmark]
@@ -54,7 +54,8 @@ namespace Bonanza.Storage.Benchmark
 				while (enumerator.MoveNext() && eventsStored < EventsCount)
 				{
 					var aggregatesId = enumerator.Current;
-					eventStore.Append(aggregatesId.Key, data[(int)DataSize], aggregatesIds[aggregatesId.Key].version++, true);
+					eventStore.Append(aggregatesId.Key, data[(int)DataSize], aggregatesIds[aggregatesId.Key].Version, true);
+					aggregatesIds[aggregatesId.Key].VersionIncrement();
 					//aggregatesIds[aggregatesId.Key] = aggregatesIds[aggregatesId.Key] + 1;
 					eventsStored++;
 					if (eventsStored != 0 && eventsStored % 1000 == 0)
