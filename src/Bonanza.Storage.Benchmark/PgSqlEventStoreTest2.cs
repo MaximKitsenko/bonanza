@@ -75,7 +75,7 @@ namespace Bonanza.Storage.Benchmark
 			}
 		}
 
-		public StreamsBatch[] GenerateTestCases(int testCasesCount,
+		public StreamsBatch[] GenerateStreamsBatches(int testCasesCount,
 			int streamsCount,
 			int eventsPerStream,
 			string streamNamePrefix, 
@@ -90,26 +90,30 @@ namespace Bonanza.Storage.Benchmark
 			return testCases;
 		}
 
-		public void SendStreamsBatchesToEventStore()
+		public void SendStreamsBatchesToEventStore(
+			int batchesCount, 
+			int streamsInBatchCount, 
+			int eventCountPerStream, 
+			string eventsInBatchPrefixName, 
+			string eventStoreConnectionString, 
+			bool dropEventStore)
 		{
-			const int streamsCount = 1_000_000;
-			const int eventsPerStream = 50;
-			const string streamNamePrefix = "TestCase";
-			const int batchCount = 10;
-			const string connectionString = "Host=localhost;Database=bonanza-test-db-002;Username=root;Password=root";
-			const bool dropDb = false;
+			var streamsBatches = GenerateStreamsBatches(
+				batchesCount,
+				streamsInBatchCount,
+				eventCountPerStream,
+				eventsInBatchPrefixName,
+				dropEventStore);
 
-			var streamsBatches = GenerateTestCases(batchCount, streamsCount, eventsPerStream, streamNamePrefix, dropDb);
-
-			var eventStore = new PostgreSql.PgSqlEventStore(connectionString).Initialize(dropDb);
+			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString).Initialize(dropEventStore);
+			//Task.Delay(10000).Wait(); // wait until db will be initialized ! no need since it's not async
 
 			var testRuns = new List<Task>();
-			Task.Delay(10000).Wait();
 			for (int i = 0; i < streamsBatches.Length; i++)
 			{
-				var temp = i;
+				var streamsBatch = streamsBatches[i];
 				//testRuns.Add(Task.Run(() => (new PgSqlEventStoreTest2(this._logger)).AppendManyEvents(testCases[temp], eventStore)));
-				testRuns.Add(Task.Run(() => this.SendStreamBatchToEventStore(streamsBatches[temp], eventStore)));
+				testRuns.Add(Task.Run(() => this.SendStreamBatchToEventStore(streamsBatch, eventStore)));
 			}
 
 			Task.WaitAll(testRuns.ToArray());

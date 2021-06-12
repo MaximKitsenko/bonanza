@@ -24,7 +24,13 @@ namespace Bonanza.Storage.Benchmark
 
 			ConfigureLogging();
 			var test2 = new PgSqlEventStoreTest2(Log.Logger);
-			test2.SendStreamsBatchesToEventStore();
+			test2.SendStreamsBatchesToEventStore(
+				10, 
+				1_000_000, 50, 
+				"TestCase", 
+				"Host=localhost;Database=bonanza-test-db-002;Username=root;Password=root", 
+				false);
+
 			Console.WriteLine("Press Enter for pause. ");
 			Console.ReadLine();
 
