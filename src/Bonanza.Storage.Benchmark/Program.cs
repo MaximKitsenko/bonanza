@@ -22,32 +22,17 @@ namespace Bonanza.Storage.Benchmark
 			// test.EventsCount = 100000;
 			// test.SendManyEvents();
 
-			LogJson();
+			ConfigureLogging();
 			//LogFluent();
 
 			//var test2 = new PgSqlEventStoreTest2();
 			//test2.RunMany2();
 			//Console.WriteLine("Press Enter for pause. ");
 			//Console.ReadLine();
+
 		}
 
-		private static void LogFluent()
-		{
-			var logger2 = new LoggerConfiguration()
-				.MinimumLevel.Information()
-				.WriteTo.Console()
-				.WriteTo.File("performance.log",
-					rollingInterval: RollingInterval.Day,
-					rollOnFileSizeLimit: true)
-				.CreateLogger();
-
-			var position = new {pos = 1};
-			var elapsedMs = 1;
-			Log.Logger.Information("Processed {@Position} in {Elapsed} ms.", position, elapsedMs);
-			logger2.Information("Processed {@Position} in {Elapsed} ms.", position, elapsedMs);
-		}
-
-		private static void LogJson()
+		private static void ConfigureLogging()
 		{
 			var configurationBuilder = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json");
@@ -64,7 +49,7 @@ namespace Bonanza.Storage.Benchmark
 
 			var position = new {pos = 1};
 			var elapsedMs = 1;
-			Log.Logger.Information("Processed {@Position} in {Elapsed} ms.", position, elapsedMs);
+			Log.Logger.Information("LoggerConfigured {@Position} in {Elapsed} ms.", position, elapsedMs);
 		}
 	}
 }
