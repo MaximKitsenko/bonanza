@@ -34,7 +34,7 @@ namespace Bonanza.Storage.PostgreSql
 			{
 				conn.Open();
 				const string dropTable = @"DROP TABLE es_events;";
-				const string createTable = @"CREATE TABLE IF NOT EXISTS ES_Events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
+				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
@@ -57,8 +57,15 @@ $$ -- here start procedural part
 $$ -- here finish procedural part
 LANGUAGE plpgsql; -- language specification ";
 
-				const string createTableSql = createTable + createIdx + createFunction;
-				const string dropTableCreateTableSql = dropTable + createTable + createIdx + createFunction;
+				const string createTableSql = 
+				createTable 
+				+ createIdx 
+				+ createFunction;
+				const string dropTableCreateTableSql = 
+					dropTable 
+					+ createTable 
+					+ createIdx 
+					+ createFunction;
 
 				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
 				{
