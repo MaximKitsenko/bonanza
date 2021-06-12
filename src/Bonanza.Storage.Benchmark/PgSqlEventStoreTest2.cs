@@ -19,34 +19,37 @@ namespace Bonanza.Storage.Benchmark
 			Console.WriteLine($"{nameof(PgSqlEventStoreTest2)}{nameof(SendManyEvents)}");
 			var eventsStored = -1;
 			var sw = Stopwatch.StartNew();
-			while (eventsStored < testCase.StreamMaxVer)
+			for (int i = 0; i < testCase.StreamMaxVer; i++)
 			{
-				using (var eventsEnumerator = testCase.Streams.GetEnumerator())
+				foreach (var (streamName, streamNameAndVersion) in testCase.Streams)
 				{
-					while (eventsEnumerator.MoveNext() && eventsStored < testCase.StreamMaxVer)
+					try
 					{
-						try
-						{
-							var aggregatesId = eventsEnumerator.Current;
-							eventStore.Append(aggregatesId.Key, testCase.Data, testCase.Streams[aggregatesId.Key].Version, true);
-							testCase.Streams[aggregatesId.Key].VersionIncrement();
-							eventsStored++;
+						eventStore.Append(streamName, testCase.Data, streamNameAndVersion.Version, true);
 
-							if (eventsStored != 0 && eventsStored % 1000 == 0)
-							{
-								var time = sw.ElapsedMilliseconds + 1;
-								var perf = (int)((1000 * 1_000.0) / time);
-								Console.WriteLine("Thread-{0}, {1:D10} events processed, speed: {2:D10} appends/sec", System.Threading.Thread.CurrentThread.ManagedThreadId, eventsStored, perf);
-								sw.Restart();
-							}
-						}
-						catch (Exception e)
-						{
-							Console.WriteLine(e);
-							throw;
-						}
+						streamNameAndVersion.VersionIncrement();
+						eventsStored++;
+
+						WriteLog(eventsStored, sw);
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e);
+						throw;
 					}
 				}
+			}
+		}
+
+		private static void WriteLog(int eventsStored, Stopwatch sw)
+		{
+			if (eventsStored != 0 && eventsStored % 1000 == 0)
+			{
+				var time = sw.ElapsedMilliseconds + 1;
+				var perf = (int) ((1000 * 1_000.0) / time);
+				Console.WriteLine("Thread-{0}, {1:D10} events processed, speed: {2:D10} appends/sec",
+					System.Threading.Thread.CurrentThread.ManagedThreadId, eventsStored, perf);
+				sw.Restart();
 			}
 		}
 
