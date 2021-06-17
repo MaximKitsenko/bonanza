@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Toolchains.Results;
 using Bonanza.Storage.Benchmark.TestData;
 using Bonanza.Storage.PostgreSql;
@@ -90,7 +91,7 @@ namespace Bonanza.Storage.Benchmark
 			return testCases;
 		}
 
-		public void SendStreamsBatchesToEventStore(
+		public void SendPregeneratedStreamBatchesToEventStore(
 			int batchesCount, 
 			int streamsInBatchCount, 
 			int eventCountPerStream, 
@@ -117,6 +118,56 @@ namespace Bonanza.Storage.Benchmark
 			}
 
 			Task.WaitAll(testRuns.ToArray());
+		}
+
+		public void SendStreamBatchesToEventStore(
+			int batchesCount,
+			int streamsInBatchCount,
+			int eventCountPerStream,
+			string eventsInBatchPrefixName,
+			string eventStoreConnectionString,
+			bool dropEventStore)
+		{
+			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString).Initialize(dropEventStore);
+			var data = new byte[(int)DataSizeEnum._1KByte];
+			var tasks = new List<Task>();
+			for (var i = 0; i < batchesCount; i++)
+			{
+				var temp = i;
+				var task = Task.Run((() => AppendBatchToEventStore(streamsInBatchCount, eventCountPerStream,
+					eventsInBatchPrefixName, temp, eventStore, data)));
+				tasks.Add(task);
+			}
+
+			Task.WaitAll(tasks.ToArray());
+		}
+
+		private static void AppendBatchToEventStore(int streamsInBatchCount, int eventCountPerStream,
+			string eventsInBatchPrefixName, int i, PgSqlEventStore eventStore, byte[] data)
+		{
+			var streamNameAndVersion = new Dictionary<string, int>();
+			for (int j = 0; j < eventCountPerStream; j++)
+			{
+				for (int k = 0; k < streamsInBatchCount; k++)
+				{
+					try
+					{
+						var streamName = $"{eventsInBatchPrefixName}-batch{i:D5}-stream-{k:D7}";
+						if (!streamNameAndVersion.TryGetValue(streamName, out var version))
+						{
+							version = -1;
+						}
+
+						eventStore.Append(streamName, data, version, true);
+						streamNameAndVersion[streamName] = version + 1;
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e);
+						throw;
+					}
+				}
+			}
 		}
 	}
 }

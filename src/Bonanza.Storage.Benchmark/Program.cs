@@ -26,7 +26,7 @@ namespace Bonanza.Storage.Benchmark
 			ConfigureLogging();
 
 			var test = new PgSqlEventStoreTest2(Log.Logger);
-			test.SendStreamsBatchesToEventStore(
+			test.SendStreamBatchesToEventStore(
 				config.BenchmarkConfig.BatchesCount,
 				config.BenchmarkConfig.StreamsCountInBatch,
 				config.BenchmarkConfig.EventCountInStream,
