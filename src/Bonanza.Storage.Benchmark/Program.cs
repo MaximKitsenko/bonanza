@@ -22,18 +22,37 @@ namespace Bonanza.Storage.Benchmark
 			// test.EventsCount = 100000;
 			// test.SendManyEvents();
 
+			var config = GetConfig();
 			ConfigureLogging();
-			var test2 = new PgSqlEventStoreTest2(Log.Logger);
-			test2.SendStreamsBatchesToEventStore(
-				10, 
-				1_000_000, 50, 
-				"TestCase", 
-				"Host=localhost;Database=bonanza-test-db-002;Username=root;Password=root", 
-				false);
 
-			Console.WriteLine("Press Enter for pause. ");
-			Console.ReadLine();
+			var test = new PgSqlEventStoreTest2(Log.Logger);
+			test.SendStreamsBatchesToEventStore(
+				config.BenchmarkConfig.BatchesCount,
+				config.BenchmarkConfig.StreamsCountInBatch,
+				config.BenchmarkConfig.EventCountInStream,
+				config.BenchmarkConfig.EventsInBatchPrefixName,
+				config.ConnectionString,
+				config.BenchmarkConfig.DropDb);
 
+			//while (true)
+			{
+				Console.WriteLine("Press Enter to exit. ");
+				Console.ReadLine();
+			}
+
+		}
+
+		private static AppConfig GetConfig()
+		{
+			var configurationBuilder = new ConfigurationBuilder()
+				.AddJsonFile("appsettings.json");
+
+			var configuration = configurationBuilder
+				.Build();
+
+			//var rmqHost = config["RabbitMQ:Host"];
+			var cfg = configuration.Get<AppConfig>();
+			return cfg;
 		}
 
 		private static void ConfigureLogging()
