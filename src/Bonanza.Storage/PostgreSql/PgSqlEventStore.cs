@@ -189,9 +189,10 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 				*/
 				tx.Commit();
-				if (Interlocked.Increment(ref appendCount) % 1000 ==0)
+				if (Interlocked.Increment(ref appendCount) % 1000 == 0)
 				{
-					Console.WriteLine("[ EventStore ] Events appended {0:D5}, speed:  {1:F1}", appendCount, 1000.0*1000/(sw.ElapsedMilliseconds+1.0));
+					_logger?.Information("[ EventStore ] Events appended {appendCount:D5}, speed: {speed:F1}", appendCount,
+						1000.0 * 1000 / (sw.ElapsedMilliseconds + 1.0));
 					sw.Restart();
 				}
 			}
