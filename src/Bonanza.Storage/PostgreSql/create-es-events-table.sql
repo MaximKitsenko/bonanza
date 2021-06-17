@@ -1,4 +1,4 @@
-CREATE DATABASE "bonanza-test-db"
+CREATE DATABASE "bonanza-dev-db"
     WITH 
     OWNER = root
     ENCODING = 'UTF8'
