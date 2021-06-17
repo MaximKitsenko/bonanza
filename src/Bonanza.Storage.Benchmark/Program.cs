@@ -22,8 +22,9 @@ namespace Bonanza.Storage.Benchmark
 			// test.EventsCount = 100000;
 			// test.SendManyEvents();
 
-			var config = GetConfig();
-			ConfigureLogging();
+			var configuration = GetRawConfiguration();
+			var config = GetTypedConfiguration(configuration);
+			ConfigureLogging(configuration);
 
 			var test = new PgSqlEventStoreTest2(Log.Logger);
 			test.SendStreamBatchesToEventStore(
@@ -42,26 +43,30 @@ namespace Bonanza.Storage.Benchmark
 
 		}
 
-		private static AppConfig GetConfig()
+		private static AppConfig GetTypedConfiguration(IConfigurationRoot configuration)
 		{
-			var configurationBuilder = new ConfigurationBuilder()
-				.AddJsonFile("appsettings.json");
-
-			var configuration = configurationBuilder
-				.Build();
-
 			//var rmqHost = config["RabbitMQ:Host"];
 			var cfg = configuration.Get<AppConfig>();
 			return cfg;
 		}
 
-		private static void ConfigureLogging()
+		private static IConfigurationRoot GetRawConfiguration()
 		{
 			var configurationBuilder = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json");
 
 			var configuration = configurationBuilder
 				.Build();
+			return configuration;
+		}
+
+		private static void ConfigureLogging(IConfigurationRoot configuration)
+		{
+			//var configurationBuilder = new ConfigurationBuilder()
+			//	.AddJsonFile("appsettings.json");
+
+			//var configuration = configurationBuilder
+			//	.Build();
 
 			var loggerConfiguration = new LoggerConfiguration()
 				.ReadFrom

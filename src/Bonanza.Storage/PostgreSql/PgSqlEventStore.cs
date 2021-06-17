@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Npgsql;
+using Serilog;
 
 namespace Bonanza.Storage.PostgreSql
 {
@@ -18,12 +19,14 @@ namespace Bonanza.Storage.PostgreSql
 	{
 		readonly string _connectionString;
 		private ConcurrentQueue<NpgsqlConnection> _connections;
+		private ILogger _logger;
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
 
-		public PgSqlEventStore(string connectionString)
+		public PgSqlEventStore(string connectionString, ILogger logger)
 		{
 			_connectionString = connectionString;
+			_logger = logger;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 
 		}
@@ -122,7 +125,7 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
-		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection)
+		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection )
 		{
 			if (cacheConnection)
 			{

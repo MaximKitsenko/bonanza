@@ -106,7 +106,7 @@ namespace Bonanza.Storage.Benchmark
 				eventsInBatchPrefixName,
 				dropEventStore);
 
-			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString).Initialize(dropEventStore);
+			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, null).Initialize(dropEventStore);
 			//Task.Delay(10000).Wait(); // wait until db will be initialized ! no need since it's not async
 
 			var testRuns = new List<Task>();
@@ -128,7 +128,7 @@ namespace Bonanza.Storage.Benchmark
 			string eventStoreConnectionString,
 			bool dropEventStore)
 		{
-			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString).Initialize(dropEventStore);
+			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, _logger).Initialize(dropEventStore);
 			var data = new byte[(int)DataSizeEnum._1KByte];
 			var tasks = new List<Task>();
 			for (var i = 0; i < batchesCount; i++)
@@ -157,7 +157,6 @@ namespace Bonanza.Storage.Benchmark
 						{
 							version = -1;
 						}
-
 						eventStore.Append(streamName, data, version, true);
 						streamNameAndVersion[streamName] = version + 1;
 					}
