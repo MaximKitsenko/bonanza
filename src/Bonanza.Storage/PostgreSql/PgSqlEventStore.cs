@@ -209,7 +209,7 @@ LANGUAGE plpgsql; -- language specification ";
 		{
 			if ((_logEveryEventsCount > 0) && (appendCount % _logEveryEventsCount == 0))
 			{
-				_logger?.Information("[ EventStore ] Events appended {appendCount:D5}, speed: {speed:F1}", appendCount,
+					_logger?.Information("[ EventStore ] Events appended {appendCount:D10}, speed: {speed:F1}", appendCount,
 					_logEveryEventsCount * 1000 / (sw.ElapsedMilliseconds + 1.0));
 				sw.Restart();
 			}
