@@ -12,6 +12,15 @@ services:
       - "5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql
+	deploy:
+		resources:
+			limits:
+			 cpus: '6'
+			 memory: 8000m
+			reservations:
+				cpus: '0.1'
+			 memory: 800m
+
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
