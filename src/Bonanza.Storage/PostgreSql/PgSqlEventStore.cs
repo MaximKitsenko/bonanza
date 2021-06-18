@@ -36,7 +36,7 @@ namespace Bonanza.Storage.PostgreSql
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
 				conn.Open();
-				const string dropTable = @"DROP TABLE es_events;";
+				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
@@ -191,7 +191,7 @@ LANGUAGE plpgsql; -- language specification ";
 				tx.Commit();
 				if (Interlocked.Increment(ref appendCount) % 1000 == 0)
 				{
-					_logger?.Information("[ EventStore ] Events appended {appendCount:D5}, speed: {speed:F1}", appendCount,
+					_logger?.Information("[ EventStore ] Events appended {appendCount:D10}, speed: {speed:F1}", appendCount,
 						1000.0 * 1000 / (sw.ElapsedMilliseconds + 1.0));
 					sw.Restart();
 				}
