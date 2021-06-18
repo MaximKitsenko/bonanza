@@ -20,13 +20,15 @@ namespace Bonanza.Storage.PostgreSql
 		readonly string _connectionString;
 		private ConcurrentQueue<NpgsqlConnection> _connections;
 		private ILogger _logger;
+		private int _logEveryEventsCount;
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
 
-		public PgSqlEventStore(string connectionString, ILogger logger)
+		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 
 		}
@@ -189,10 +191,11 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 				*/
 				tx.Commit();
-				if (Interlocked.Increment(ref appendCount) % 1000 == 0)
+				Interlocked.Increment(ref appendCount);
+				if ((_logEveryEventsCount >0) && (appendCount % _logEveryEventsCount == 0))
 				{
 					_logger?.Information("[ EventStore ] Events appended {appendCount:D5}, speed: {speed:F1}", appendCount,
-						1000.0 * 1000 / (sw.ElapsedMilliseconds + 1.0));
+						_logEveryEventsCount * 1000 / (sw.ElapsedMilliseconds + 1.0));
 					sw.Restart();
 				}
 			}

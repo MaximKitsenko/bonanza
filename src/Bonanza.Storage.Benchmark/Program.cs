@@ -33,7 +33,8 @@ namespace Bonanza.Storage.Benchmark
 				config.BenchmarkConfig.EventCountInStream,
 				config.BenchmarkConfig.EventsInBatchPrefixName,
 				config.ConnectionString,
-				config.BenchmarkConfig.DropDb);
+				config.BenchmarkConfig.DropDb,
+				config.BenchmarkConfig.LogEveryNEvents);
 
 			//while (true)
 			{

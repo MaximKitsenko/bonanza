@@ -13,5 +13,6 @@
 		public int EventCountInStream { get; set; }
 		public string EventsInBatchPrefixName { get; set; }
 		public bool DropDb { get; set; }
+		public int LogEveryNEvents { get; set; }
 	}
 }

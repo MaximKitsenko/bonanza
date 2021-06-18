@@ -44,7 +44,7 @@ namespace Bonanza.Storage.Benchmark
 		{
 			Console.WriteLine("qwe2");
 			var connectionString = "Host=localhost;Database=bonanza-test-db;Username=root;Password=root";
-			var eventStore = new PostgreSql.PgSqlEventStore(connectionString, null);
+			var eventStore = new PostgreSql.PgSqlEventStore(connectionString, null, 0);
 			eventStore.Initialize(true);
 			var eventsStored = -1;
 			var sw = new Stopwatch();
