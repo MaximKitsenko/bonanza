@@ -38,7 +38,7 @@ namespace Bonanza.Storage.PostgreSql
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
 				conn.Open();
-				const string dropTable = @"DROP TABLE es_events;";
+				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
