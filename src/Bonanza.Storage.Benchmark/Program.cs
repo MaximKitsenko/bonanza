@@ -32,9 +32,10 @@ namespace Bonanza.Storage.Benchmark
 				config.BenchmarkConfig.StreamsCountInBatch,
 				config.BenchmarkConfig.EventCountInStream,
 				config.BenchmarkConfig.EventsInBatchPrefixName,
-				config.ConnectionString,
+				config.PgSqlEventStoreConfig.ConnectionString,
 				config.BenchmarkConfig.DropDb,
-				config.BenchmarkConfig.LogEveryNEvents);
+				config.PgSqlEventStoreConfig.LogEveryNEvents,
+				config.PgSqlEventStoreConfig.Strategy);
 
 			//while (true)
 			{

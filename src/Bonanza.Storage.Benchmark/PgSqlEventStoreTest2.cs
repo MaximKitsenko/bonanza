@@ -91,13 +91,13 @@ namespace Bonanza.Storage.Benchmark
 			return testCases;
 		}
 
-		public void SendPregeneratedStreamBatchesToEventStore(
-			int batchesCount, 
-			int streamsInBatchCount, 
-			int eventCountPerStream, 
-			string eventsInBatchPrefixName, 
-			string eventStoreConnectionString, 
-			bool dropEventStore)
+		public void SendPregeneratedStreamBatchesToEventStore(int batchesCount,
+			int streamsInBatchCount,
+			int eventCountPerStream,
+			string eventsInBatchPrefixName,
+			string eventStoreConnectionString,
+			bool dropEventStore, 
+			AppendStrategy strategy)
 		{
 			var streamsBatches = GenerateStreamsBatches(
 				batchesCount,
@@ -106,7 +106,7 @@ namespace Bonanza.Storage.Benchmark
 				eventsInBatchPrefixName,
 				dropEventStore);
 
-			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, null, 0).Initialize(dropEventStore);
+			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, null, 0, strategy).Initialize(dropEventStore);
 			//Task.Delay(10000).Wait(); // wait until db will be initialized ! no need since it's not async
 
 			var testRuns = new List<Task>();
@@ -120,16 +120,16 @@ namespace Bonanza.Storage.Benchmark
 			Task.WaitAll(testRuns.ToArray());
 		}
 
-		public void SendStreamBatchesToEventStore(
-			int batchesCount,
+		public void SendStreamBatchesToEventStore(int batchesCount,
 			int streamsInBatchCount,
 			int eventCountPerStream,
 			string eventsInBatchPrefixName,
 			string eventStoreConnectionString,
 			bool dropEventStore,
-			int logEveryCountEvents)
+			int logEveryCountEvents, 
+			AppendStrategy strategy)
 		{
-			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, _logger, logEveryCountEvents).Initialize(dropEventStore);
+			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, _logger, logEveryCountEvents, strategy).Initialize(dropEventStore);
 			var data = new byte[(int)DataSizeEnum._1KByte];
 			var tasks = new List<Task>();
 			for (var i = 0; i < batchesCount; i++)

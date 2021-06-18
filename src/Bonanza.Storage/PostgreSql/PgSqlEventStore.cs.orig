@@ -25,7 +25,7 @@ namespace Bonanza.Storage.PostgreSql
 		private Stopwatch sw = Stopwatch.StartNew();
 		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
 
-		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy)
+		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount, int strategy)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
@@ -33,13 +33,11 @@ namespace Bonanza.Storage.PostgreSql
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 			switch (strategy)
 			{
-				case AppendStrategy.OnePhase:
+				case 1:
 					_appendMethod = Append1Phase;
-					logger.Information($" [PgSqlEventStore] strategy used: {AppendStrategy.OnePhase}");
 					break;
 				default:
 					_appendMethod = Append2Phases;
-					logger.Information($" [PgSqlEventStore] strategy used: {AppendStrategy.TwoPhases}");
 					break;
 			}
 
@@ -202,6 +200,7 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 				*/
 				tx.Commit();
+<<<<<<< HEAD
 				Interlocked.Increment(ref appendCount);
 				WriteAppendsCountIntoLog();
 			}
@@ -211,9 +210,17 @@ LANGUAGE plpgsql; -- language specification ";
 		{
 			if ((_logEveryEventsCount > 0) && (appendCount % _logEveryEventsCount == 0))
 			{
-					_logger?.Information("[ EventStore ] Events appended {appendCount:D10}, speed: {speed:F1}", appendCount,
+				_logger?.Information("[ EventStore ] Events appended {appendCount:D5}, speed: {speed:F1}", appendCount,
 					_logEveryEventsCount * 1000 / (sw.ElapsedMilliseconds + 1.0));
 				sw.Restart();
+=======
+				if (Interlocked.Increment(ref appendCount) % 1000 == 0)
+				{
+					_logger?.Information("[ EventStore ] Events appended {appendCount:D10}, speed: {speed:F1}", appendCount,
+						1000.0 * 1000 / (sw.ElapsedMilliseconds + 1.0));
+					sw.Restart();
+				}
+>>>>>>> feature/added-publish-profilers
 			}
 		}
 
@@ -297,11 +304,5 @@ LANGUAGE plpgsql; -- language specification ";
 		{
 			throw new NotImplementedException();
 		}
-	}
-
-	public enum AppendStrategy
-	{
-		OnePhase,
-		TwoPhases
 	}
 }
