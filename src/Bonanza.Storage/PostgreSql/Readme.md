@@ -18,7 +18,7 @@ Fill fields
 - - get docker container id: `docker ps`.
 - - get docker container ip by id `docker inspect fcc97e066cc8 | grep IPAddress`
 - user: root
-- password: root123456#
+- password: root123456# [`root` by default]
 
 ## Add DB
 
