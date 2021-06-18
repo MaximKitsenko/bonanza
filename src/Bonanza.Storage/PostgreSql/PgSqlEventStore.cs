@@ -35,11 +35,11 @@ namespace Bonanza.Storage.PostgreSql
 			{
 				case AppendStrategy.OnePhase:
 					_appendMethod = Append1Phase;
-					logger.Information($" [PgSqlEventStore] strategy used: {AppendStrategy.OnePhase}");
+					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.OnePhase}");
 					break;
 				default:
 					_appendMethod = Append2Phases;
-					logger.Information($" [PgSqlEventStore] strategy used: {AppendStrategy.TwoPhases}");
+					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.TwoPhases}");
 					break;
 			}
 
@@ -223,7 +223,7 @@ LANGUAGE plpgsql; -- language specification ";
 			using (var tx = conn.BeginTransaction())
 			{
 				const string sql =
-					@"SELECT COALESCE (MAX(version),0)
+					@"SELECT COALESCE (MAX(version),-1)
                         FROM public.es_events
                         WHERE name = @name;";
 				int version;
