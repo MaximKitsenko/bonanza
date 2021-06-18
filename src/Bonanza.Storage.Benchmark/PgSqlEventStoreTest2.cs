@@ -79,7 +79,7 @@ namespace Bonanza.Storage.Benchmark
 
 			var connectionString = "Host=localhost;Database=bonanza-test-db2;Username=root;Password=root";
 			var eventStore = new PostgreSql.PgSqlEventStore(connectionString);
-			eventStore.Initialize(true);
+			eventStore.Initialize(false);
 
 			var testRuns = new List<Task>();
 			Task.Delay(10000).Wait();
@@ -99,13 +99,13 @@ namespace Bonanza.Storage.Benchmark
 			var testCases = new PgSqlEventStoreTestData[testCasesCount];
 			for(var i = 0; i < testCases.Length; i++)
 			{
-				testCases[i] = PgSqlEventStoreTestData.Generate(1_000_000, $"TestCase{i:D7}", 25_000_000, true, DataSizeEnum._1KByte);
+				testCases[i] = PgSqlEventStoreTestData.Generate(1_000_000, $"TestCase{i:D7}", 25_000_000, false, DataSizeEnum._1KByte);
 			}
 
-			var connectionString = "Host=localhost;Database=bonanza-test-db-002;Username=root;Password=root";
+			var connectionString = "Host=localhost;Database=bonanza-test-db;Username=root;Password=root";
 			var eventStore = new PostgreSql.PgSqlEventStore(connectionString);
-			eventStore.Initialize(true);
-/*
+			eventStore.Initialize(false);
+
 			var testRuns = new List<Task>();
 			Task.Delay(10000).Wait();
 			for (int i = 0; i < testCases.Length; i++)
@@ -114,7 +114,7 @@ namespace Bonanza.Storage.Benchmark
 				testRuns.Add(Task.Run(() => (new PgSqlEventStoreTest2()).SendManyEvents(testCases[temp], eventStore)));
 			}
 
-			Task.WaitAll(testRuns.ToArray());*/
+			Task.WaitAll(testRuns.ToArray());
 		}
 	}
 }
