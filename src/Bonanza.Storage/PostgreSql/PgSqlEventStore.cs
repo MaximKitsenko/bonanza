@@ -37,6 +37,10 @@ namespace Bonanza.Storage.PostgreSql
 					_appendMethod = Append1Phase;
 					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.OnePhase}");
 					break;
+				case AppendStrategy.OnePhaseNoVersionCheck:
+					_appendMethod = Append1Phase;
+					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.OnePhaseNoVersionCheck}");
+					break;
 				default:
 					_appendMethod = Append2Phases;
 					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.TwoPhases}");
@@ -298,11 +302,49 @@ LANGUAGE plpgsql; -- language specification ";
 				WriteAppendsCountIntoLog();
 			}
 		}
+
+		public void Append1PhaseNoVersionCheck(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		{
+			using (var tx = conn.BeginTransaction())
+			{
+				/*
+				const string sql = @"SELECT appendevent(@expectedVersion,@name,@data)";
+
+				int version;
+				using (var cmd = new NpgsqlCommand(sql, conn, tx))
+				{
+					cmd.Parameters.AddWithValue("@name", name);
+					cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
+					cmd.Parameters.AddWithValue("@data", data);
+					version = (int)cmd.ExecuteScalar();
+					if (expectedVersion != -1)
+					{
+						if (version != expectedVersion)
+						{
+							throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
+						}
+					}
+				}
+				*/
+
+				
+				const string txt =
+					@"INSERT INTO public.es_events (Name,Version,Data) 
+                                VALUES(@name, @version, @data)";
+
+				using (var cmd = new NpgsqlCommand(txt, conn, tx))
+				{
+					cmd.Parameters.AddWithValue("@name", name);
+					cmd.Parameters.AddWithValue("@version", 1);
+					cmd.Parameters.AddWithValue("@data", data);
+					cmd.ExecuteNonQuery();
+				}
+				
+				tx.Commit();
+				Interlocked.Increment(ref appendCount);
+				WriteAppendsCountIntoLog();
+			}
+		}
 	}
 
-	public enum AppendStrategy
-	{
-		OnePhase,
-		TwoPhases
-	}
 }

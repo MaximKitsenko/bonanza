@@ -126,11 +126,12 @@ namespace Bonanza.Storage.Benchmark
 			string eventsInBatchPrefixName,
 			string eventStoreConnectionString,
 			bool dropEventStore,
-			int logEveryCountEvents, 
-			AppendStrategy strategy)
+			int logEveryCountEvents,
+			AppendStrategy strategy, 
+			int dataSize)
 		{
 			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, _logger, logEveryCountEvents, strategy).Initialize(dropEventStore);
-			var data = new byte[(int)DataSizeEnum._1KByte];
+			var data = new byte[dataSize];
 			var tasks = new List<Task>();
 			for (var i = 0; i < batchesCount; i++)
 			{

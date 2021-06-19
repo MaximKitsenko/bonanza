@@ -35,7 +35,8 @@ namespace Bonanza.Storage.Benchmark
 				config.PgSqlEventStoreConfig.ConnectionString,
 				config.BenchmarkConfig.DropDb,
 				config.PgSqlEventStoreConfig.LogEveryNEvents,
-				config.PgSqlEventStoreConfig.Strategy);
+				config.PgSqlEventStoreConfig.Strategy,
+				config.BenchmarkConfig.DataSize);
 
 			//while (true)
 			{

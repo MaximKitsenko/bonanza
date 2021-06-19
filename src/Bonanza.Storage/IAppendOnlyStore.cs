@@ -89,11 +89,18 @@ namespace Bonanza.Storage
 		}
 	}
 
-    /// <summary>
-    /// Is thrown internally, when storage version does not match the condition 
-    /// specified in server request
-    /// </summary>
-    [Serializable]
+	public enum AppendStrategy
+	{
+		OnePhase,
+		OnePhaseNoVersionCheck,
+		TwoPhases
+	}
+
+	/// <summary>
+	/// Is thrown internally, when storage version does not match the condition 
+	/// specified in server request
+	/// </summary>
+	[Serializable]
     public class AppendOnlyStoreConcurrencyException : Exception
     {
         public long ExpectedStreamVersion { get; private set; }
