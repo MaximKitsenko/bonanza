@@ -3,10 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Data.Sqlite;
 using Npgsql;
 using Serilog;
 
-namespace Bonanza.Storage.PostgreSql
+namespace Bonanza.Storage.SqLite
 {
 	/// <summary>
 	/// <para>This is a SQL event storage for PgSql, simplified to demonstrate 
@@ -15,56 +16,43 @@ namespace Bonanza.Storage.PostgreSql
 	/// Jonathan Oliver</para>
 	/// <para>This code is frozen to match IDDD book. For latest practices see Lokad.CQRS Project</para>
 	/// </summary>
-	public sealed class PgSqlEventStore : IAppendOnlyStore
+	public sealed class SqLiteEventStore : IAppendOnlyStore
 	{
 		readonly string _connectionString;
-		private ConcurrentQueue<NpgsqlConnection> _connections;
+		private ConcurrentQueue<SqliteConnection> _connections;
 		private ILogger _logger;
 		private int _logEveryEventsCount;
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
-		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
+		private Action<string, byte[], long, SqliteConnection> _appendMethod;
 
-		private Action<string, byte[], long, NpgsqlConnection> ChooseStrategy(AppendStrategy strategy)
-		{
-			var dict = new Dictionary<AppendStrategy, Action<string, byte[], long, NpgsqlConnection>>()
-			{
-				{AppendStrategy.OnePhase, Append1Phase},
-				{AppendStrategy.OnePhaseNoVersionCheck, Append1PhaseNoVersionCheck},
-				{AppendStrategy.TwoPhases, Append2Phases},
-			};
-
-			var choosenStrategy = dict[strategy];
-			return choosenStrategy;
-		}
-
-		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy)
+		public SqLiteEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
 			_logEveryEventsCount = logEveryEventsCount;
-			_connections = new ConcurrentQueue<NpgsqlConnection>();
+			_connections = new ConcurrentQueue<SqliteConnection>();
 			switch (strategy)
 			{
 				case AppendStrategy.OnePhase:
 					_appendMethod = Append1Phase;
-					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.OnePhase}");
+					logger.Information($"[SqliteEventStore] strategy used: {AppendStrategy.OnePhase}");
 					break;
 				case AppendStrategy.OnePhaseNoVersionCheck:
 					_appendMethod = Append1PhaseNoVersionCheck;
-					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.OnePhaseNoVersionCheck}");
+					logger.Information($"[SqliteEventStore] strategy used: {AppendStrategy.OnePhaseNoVersionCheck}");
 					break;
 				default:
 					_appendMethod = Append2Phases;
-					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.TwoPhases}");
+					logger.Information($"[SqliteEventStore] strategy used: {AppendStrategy.TwoPhases}");
 					break;
 			}
 
 		}
 
-		public PgSqlEventStore Initialize(bool dropDb)
+		public SqLiteEventStore Initialize(bool dropDb)
 		{
-			using (var conn = new NpgsqlConnection(_connectionString))
+			using (var conn = new SqliteConnection(_connectionString))
 			{
 				conn.Open();
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
@@ -101,7 +89,7 @@ LANGUAGE plpgsql; -- language specification ";
 					+ createIdx 
 					+ createFunction;
 
-				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
+				using (var cmd = conn.CreateCommand(dropDb ? dropTableCreateTableSql : createTableSql))
 				{
 					cmd.ExecuteNonQuery();
 				}
@@ -119,7 +107,7 @@ LANGUAGE plpgsql; -- language specification ";
 		{
 			if (cacheConnection)
 			{
-				NpgsqlConnection conn = null;
+				SqliteConnection conn = null;
 				try
 				{
 					conn = GetFromCacheOrNew();
@@ -135,7 +123,7 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 			else
 			{
-				using (var conn = new NpgsqlConnection(_connectionString))
+				using (var conn = new SqliteConnection(_connectionString))
 				{
 					conn.Open();
 					_appendMethod(name, data, expectedVersion, conn);
@@ -153,16 +141,16 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
-		private NpgsqlConnection GetFromCacheOrNew()
+		private SqliteConnection GetFromCacheOrNew()
 		{
-			NpgsqlConnection conn;
+			SqliteConnection conn;
 			if (_connections.TryDequeue(out var temp))
 			{
 				conn = temp;
 			}
 			else
 			{
-				conn = new NpgsqlConnection(_connectionString);
+				conn = new SqliteConnection(_connectionString);
 				conn.Open();
 			}
 
@@ -171,7 +159,7 @@ LANGUAGE plpgsql; -- language specification ";
 
 		public IEnumerable<DataWithVersion> ReadRecords(string name, long afterVersion, int maxCount)
 		{
-			using (var conn = new NpgsqlConnection(_connectionString))
+			using (var conn = new SqliteConnection(_connectionString))
 			{
 				conn.Open();
 				const string sql =
@@ -179,7 +167,8 @@ LANGUAGE plpgsql; -- language specification ";
                         WHERE Name = @name AND version>@version
                         ORDER BY version
                         LIMIT @take OFFSET 0";
-				using (var cmd = new NpgsqlCommand(sql, conn))
+				//using (var cmd = new NpgsqlCommand(sql, conn))
+				using (var cmd = conn.CreateCommand(sql))
 				{
 					cmd.Parameters.AddWithValue("?name", name);
 					cmd.Parameters.AddWithValue("?version", afterVersion);
@@ -199,7 +188,7 @@ LANGUAGE plpgsql; -- language specification ";
 
 		public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
 		{
-            using (var conn = new NpgsqlConnection(_connectionString))
+            using (var conn = new SqliteConnection(_connectionString))
             {
                 conn.Open();
                 const string sql =
@@ -207,8 +196,9 @@ LANGUAGE plpgsql; -- language specification ";
                         WHERE Id>@after
                         ORDER BY Id
                         LIMIT @take OFFSET 0";
-                using (var cmd = new NpgsqlCommand(sql, conn))
-                {
+                //using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var cmd = conn.CreateCommand(sql))
+				{
                     cmd.Parameters.AddWithValue("@after", afterVersion);
                     cmd.Parameters.AddWithValue("@take", maxCount);
                     using (var reader = cmd.ExecuteReader())
@@ -235,7 +225,7 @@ LANGUAGE plpgsql; -- language specification ";
 			throw new NotImplementedException();
 		}
 
-		public void Append2Phases(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		public void Append2Phases(string name, byte[] data, long expectedVersion, SqliteConnection conn)
 		{
 			using (var tx = conn.BeginTransaction())
 			{
@@ -244,7 +234,8 @@ LANGUAGE plpgsql; -- language specification ";
                         FROM public.es_events
                         WHERE name = @name;";
 				int version;
-				using (var cmd = new NpgsqlCommand(sql, conn, tx))
+				//using (var cmd = new NpgsqlCommand(sql, conn, tx))
+				using (var cmd = conn.CreateCommand(sql))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
 					version = (int)cmd.ExecuteScalar();
@@ -261,7 +252,8 @@ LANGUAGE plpgsql; -- language specification ";
 					@"INSERT INTO public.es_events (Name,Version,Data) 
                             VALUES(@name, @version, @data)";
 
-				using (var cmd = new NpgsqlCommand(txt, conn, tx))
+				//using (var cmd = new NpgsqlCommand(txt, conn, tx))
+				using (var cmd = conn.CreateCommand(sql))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
 					cmd.Parameters.AddWithValue("@version", version + 1);
@@ -275,7 +267,7 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
-		public void Append1Phase(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		public void Append1Phase(string name, byte[] data, long expectedVersion, SqliteConnection conn)
 		{
 			using (var tx = conn.BeginTransaction())
 			{
@@ -283,7 +275,8 @@ LANGUAGE plpgsql; -- language specification ";
 					@"SELECT appendevent(@expectedVersion,@name,@data)";
 
 				int version;
-				using (var cmd = new NpgsqlCommand(sql, conn, tx))
+				//using (var cmd = new NpgsqlCommand(sql, conn, tx))
+				using (var cmd = conn.CreateCommand(sql))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
 					cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
@@ -316,7 +309,7 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
-		public void Append1PhaseNoVersionCheck(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		public void Append1PhaseNoVersionCheck(string name, byte[] data, long expectedVersion, SqliteConnection conn)
 		{
 			using (var tx = conn.BeginTransaction())
 			{
@@ -341,11 +334,12 @@ LANGUAGE plpgsql; -- language specification ";
 				*/
 
 				
-				const string txt =
+				const string sql =
 					@"INSERT INTO public.es_events (Name,Version,Data) 
                                 VALUES(@name, @version, @data)";
 
-				using (var cmd = new NpgsqlCommand(txt, conn, tx))
+				//using (var cmd = new NpgsqlCommand(txt, conn, tx))
+				using (var cmd = conn.CreateCommand(sql))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
 					cmd.Parameters.AddWithValue("@version", 1);
@@ -359,5 +353,4 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 	}
-
 }

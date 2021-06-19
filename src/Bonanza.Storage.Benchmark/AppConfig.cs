@@ -39,11 +39,4 @@ namespace Bonanza.Storage.Benchmark
 		PostgreSql,
 		SqLite,
 	}
-
-	public enum AppendStrategy
-	{
-		OnePhase,
-		OnePhaseNoVersionCheck,
-		TwoPhases
-	}
 }
