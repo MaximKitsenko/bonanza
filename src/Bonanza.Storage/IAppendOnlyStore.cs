@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Bonanza.Storage
 {
-	interface IAppendOnlyStore : IDisposable
+	public interface IAppendOnlyStore : IDisposable
 	{
 		/// <summary>
 		/// FROM LIDDD:

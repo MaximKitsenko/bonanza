@@ -57,7 +57,7 @@ namespace Bonanza.Storage.SqLite
 				conn.Open();
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
-				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON es_events (name ASC)";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
@@ -79,15 +79,15 @@ $$ -- here start procedural part
 $$ -- here finish procedural part
 LANGUAGE plpgsql; -- language specification ";
 
-				const string createTableSql = 
-				createTable 
-				+ createIdx 
-				+ createFunction;
-				const string dropTableCreateTableSql = 
-					dropTable 
-					+ createTable 
-					+ createIdx 
-					+ createFunction;
+				const string createTableSql =
+					createTable
+					+ createIdx;
+				//+ createFunction;
+				const string dropTableCreateTableSql =
+					dropTable
+					+ createTable
+					+ createIdx;
+					//+ createFunction;
 
 				using (var cmd = conn.CreateCommand(dropDb ? dropTableCreateTableSql : createTableSql))
 				{
@@ -231,14 +231,14 @@ LANGUAGE plpgsql; -- language specification ";
 			{
 				const string sql =
 					@"SELECT COALESCE (MAX(version),-1)
-                        FROM public.es_events
+                        FROM es_events
                         WHERE name = @name;";
 				int version;
 				//using (var cmd = new NpgsqlCommand(sql, conn, tx))
 				using (var cmd = conn.CreateCommand(sql))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
-					version = (int)cmd.ExecuteScalar();
+					version = (int)(long)cmd.ExecuteScalar();
 					if (expectedVersion != -1)
 					{
 						if (version != expectedVersion)
@@ -249,7 +249,7 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 
 				const string txt =
-					@"INSERT INTO public.es_events (Name,Version,Data) 
+					@"INSERT INTO es_events (Name,Version,Data) 
                             VALUES(@name, @version, @data)";
 
 				//using (var cmd = new NpgsqlCommand(txt, conn, tx))

@@ -23,7 +23,7 @@ namespace Bonanza.Storage.Benchmark
 			_logger = logger;
 		}
 
-		public void SendStreamBatchToEventStore(StreamsBatch fromStreamsBatch, PgSqlEventStore eventStore)
+		public void SendStreamBatchToEventStore(StreamsBatch fromStreamsBatch, IAppendOnlyStore eventStore)
 		{
 			_logger.Information(
 				"Started {method}", 
@@ -123,14 +123,10 @@ namespace Bonanza.Storage.Benchmark
 		public void SendStreamBatchesToEventStore(int batchesCount,
 			int streamsInBatchCount,
 			int eventCountPerStream,
-			string eventsInBatchPrefixName,
-			string eventStoreConnectionString,
-			bool dropEventStore,
-			int logEveryCountEvents,
-			AppendStrategy strategy, 
-			int dataSize)
+			string eventsInBatchPrefixName, 
+			int dataSize, 
+			IAppendOnlyStore eventStore)
 		{
-			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, _logger, logEveryCountEvents, strategy).Initialize(dropEventStore);
 			var data = new byte[dataSize];
 			var tasks = new List<Task>();
 			for (var i = 0; i < batchesCount; i++)
@@ -145,7 +141,7 @@ namespace Bonanza.Storage.Benchmark
 		}
 
 		private static void AppendBatchToEventStore(int streamsInBatchCount, int eventCountPerStream,
-			string eventsInBatchPrefixName, int i, PgSqlEventStore eventStore, byte[] data)
+			string eventsInBatchPrefixName, int i, IAppendOnlyStore eventStore, byte[] data)
 		{
 			var streamNameAndVersion = new Dictionary<string, int>();
 			for (int j = 0; j < eventCountPerStream; j++)
