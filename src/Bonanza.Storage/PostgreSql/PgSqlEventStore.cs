@@ -257,11 +257,11 @@ LANGUAGE plpgsql; -- language specification ";
 					}
 				}
 
-				const string txt =
+				const string insertCmd =
 					@"INSERT INTO public.es_events (Name,Version,Data) 
                             VALUES(@name, @version, @data)";
 
-				using (var cmd = new NpgsqlCommand(txt, conn, tx))
+				using (var cmd = new NpgsqlCommand(insertCmd, conn, tx))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
 					cmd.Parameters.AddWithValue("@version", version + 1);

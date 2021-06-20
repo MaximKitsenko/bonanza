@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Data.Sqlite;
@@ -56,7 +57,7 @@ namespace Bonanza.Storage.SqLite
 			{
 				conn.Open();
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
-				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
+				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id INTEGER PRIMARY KEY,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON es_events (name ASC)";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
@@ -248,16 +249,16 @@ LANGUAGE plpgsql; -- language specification ";
 					}
 				}
 
-				const string txt =
-					@"INSERT INTO es_events (Name,Version,Data) 
-                            VALUES(@name, @version, @data)";
+				string insertCmd =
+					@"INSERT INTO es_events (Name,Version,Data)
+                            VALUES($name, $version, $data)";
 
 				//using (var cmd = new NpgsqlCommand(txt, conn, tx))
-				using (var cmd = conn.CreateCommand(sql))
+				using (var cmd = conn.CreateCommand(insertCmd))
 				{
-					cmd.Parameters.AddWithValue("@name", name);
-					cmd.Parameters.AddWithValue("@version", version + 1);
-					cmd.Parameters.AddWithValue("@data", data);
+					cmd.Parameters.AddWithValue("$name", name);
+					cmd.Parameters.AddWithValue("$version", version + 1);
+					cmd.Parameters.AddWithValue("$data", data);
 					cmd.ExecuteNonQuery();
 				}
 				tx.Commit();
