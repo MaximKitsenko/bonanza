@@ -44,22 +44,8 @@ namespace Bonanza.Storage.PostgreSql
 			_logger = logger;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
-			switch (strategy)
-			{
-				case AppendStrategy.OnePhase:
-					_appendMethod = Append1Phase;
-					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.OnePhase}");
-					break;
-				case AppendStrategy.OnePhaseNoVersionCheck:
-					_appendMethod = Append1PhaseNoVersionCheck;
-					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.OnePhaseNoVersionCheck}");
-					break;
-				default:
-					_appendMethod = Append2Phases;
-					logger.Information($"[PgSqlEventStore] strategy used: {AppendStrategy.TwoPhases}");
-					break;
-			}
-
+			_appendMethod = ChooseStrategy(strategy);
+			logger.Information($"[PgSqlEventStore] strategy used: {strategy.ToString()}");
 		}
 
 		public PgSqlEventStore Initialize(bool dropDb)
