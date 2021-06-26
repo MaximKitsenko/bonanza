@@ -104,7 +104,7 @@ LANGUAGE plpgsql; -- language specification ";
 
 		}
 
-		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection )
+		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection, int tenantId)
 		{
 			if (cacheConnection)
 			{

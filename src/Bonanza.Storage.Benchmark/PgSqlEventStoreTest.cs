@@ -55,7 +55,7 @@ namespace Bonanza.Storage.Benchmark
 				while (enumerator.MoveNext() && eventsStored < EventsCount)
 				{
 					var aggregatesId = enumerator.Current;
-					eventStore.Append(aggregatesId.Key, data[(int)DataSize], aggregatesIds[aggregatesId.Key].Version, true);
+					eventStore.Append(aggregatesId.Key, data[(int)DataSize], aggregatesIds[aggregatesId.Key].Version, true, 0);
 					aggregatesIds[aggregatesId.Key].VersionIncrement();
 					//aggregatesIds[aggregatesId.Key] = aggregatesIds[aggregatesId.Key] + 1;
 					eventsStored++;

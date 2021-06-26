@@ -23,7 +23,7 @@ namespace Bonanza.Storage.Benchmark
 			_logger = logger;
 		}
 
-		public void SendStreamBatchToEventStore(StreamsBatch fromStreamsBatch, IAppendOnlyStore eventStore)
+		public void SendStreamBatchToEventStore(StreamsBatch fromStreamsBatch, IAppendOnlyStore eventStore, int tenantId)
 		{
 			_logger.Information(
 				"Started {method}", 
@@ -37,7 +37,7 @@ namespace Bonanza.Storage.Benchmark
 				{
 					try
 					{
-						eventStore.Append(streamName, fromStreamsBatch.Data, streamNameAndVersion.Version, true);
+						eventStore.Append(streamName, fromStreamsBatch.Data, streamNameAndVersion.Version, true, tenantId);
 
 						streamNameAndVersion.VersionIncrement();
 						eventsStored++;
@@ -110,11 +110,12 @@ namespace Bonanza.Storage.Benchmark
 			//Task.Delay(10000).Wait(); // wait until db will be initialized ! no need since it's not async
 
 			var testRuns = new List<Task>();
-			for (int i = 0; i < streamsBatches.Length; i++)
+			for (int tenandId = 0; tenandId < streamsBatches.Length; tenandId++)
 			{
-				var streamsBatch = streamsBatches[i];
+				var streamsBatch = streamsBatches[tenandId];
+				var temp = tenandId;
 				//testRuns.Add(Task.Run(() => (new PgSqlEventStoreTest2(this._logger)).AppendManyEvents(testCases[temp], eventStore)));
-				testRuns.Add(Task.Run(() => this.SendStreamBatchToEventStore(streamsBatch, eventStore)));
+				testRuns.Add(Task.Run(() => this.SendStreamBatchToEventStore(streamsBatch, eventStore, temp)));
 			}
 
 			Task.WaitAll(testRuns.ToArray());
@@ -141,7 +142,7 @@ namespace Bonanza.Storage.Benchmark
 		}
 
 		private static void AppendBatchToEventStore(int streamsInBatchCount, int eventCountPerStream,
-			string eventsInBatchPrefixName, int i, IAppendOnlyStore eventStore, byte[] data)
+			string eventsInBatchPrefixName, int tenantId, IAppendOnlyStore eventStore, byte[] data)
 		{
 			var streamNameAndVersion = new Dictionary<string, int>();
 			for (int j = 0; j < eventCountPerStream; j++)
@@ -150,12 +151,12 @@ namespace Bonanza.Storage.Benchmark
 				{
 					try
 					{
-						var streamName = $"{eventsInBatchPrefixName}-batch{i:D5}-stream-{k:D7}";
+						var streamName = $"{eventsInBatchPrefixName}-tenant-{tenantId:D5}-stream-{k:D7}";
 						if (!streamNameAndVersion.TryGetValue(streamName, out var version))
 						{
 							version = -1;
 						}
-						eventStore.Append(streamName, data, version, true);
+						eventStore.Append(streamName, data, version, true, tenantId);
 						streamNameAndVersion[streamName] = version + 1;
 					}
 					catch (Exception e)

@@ -23,15 +23,15 @@ namespace Bonanza.Storage.Timescale
 		private int _logEveryEventsCount;
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
-		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
+		private Action<string, byte[], long, NpgsqlConnection, int> _appendMethod;
 
-		private Action<string, byte[], long, NpgsqlConnection> ChooseStrategy(AppendStrategy strategy)
+		private Action<string, byte[], long, NpgsqlConnection, int> ChooseStrategy(AppendStrategy strategy)
 		{
-			var dict = new Dictionary<AppendStrategy, Action<string, byte[], long, NpgsqlConnection>>()
+			var dict = new Dictionary<AppendStrategy, Action<string, byte[], long, NpgsqlConnection, int>>()
 			{
-				{AppendStrategy.OnePhase, Append1Phase},
-				{AppendStrategy.OnePhaseNoVersionCheck, Append1PhaseNoVersionCheck},
-				{AppendStrategy.TwoPhases, Append2Phases},
+				{AppendStrategy.OnePhase, (name, data, expectedVersion, conn, tId) => Append1Phase(name, data, expectedVersion, conn, tId)},
+				{AppendStrategy.OnePhaseNoVersionCheck, (name, data, expectedVersion, conn, tId) => Append1PhaseNoVersionCheck(name, data, expectedVersion, conn)},
+				{AppendStrategy.TwoPhases, (name, data, expectedVersion, conn, tId) => Append2Phases(name, data, expectedVersion, conn)},
 			};
 
 			var choosenStrategy = dict[strategy];
@@ -44,21 +44,25 @@ namespace Bonanza.Storage.Timescale
 			_logger = logger;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
-			switch (strategy)
-			{
-				case AppendStrategy.OnePhase:
-					_appendMethod = Append1Phase;
-					logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.OnePhase}");
-					break;
-				case AppendStrategy.OnePhaseNoVersionCheck:
-					_appendMethod = Append1PhaseNoVersionCheck;
-					logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.OnePhaseNoVersionCheck}");
-					break;
-				default:
-					_appendMethod = Append2Phases;
-					logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.TwoPhases}");
-					break;
-			}
+
+			_appendMethod = ChooseStrategy(strategy);
+			logger.Information($"[TimescaleDbEventStore] strategy used: {strategy.ToString()}");
+
+			//switch (strategy)
+			//{
+			//	case AppendStrategy.OnePhase:
+			//		_appendMethod = (name, data, expectedVersion, conn, tId) => Append1Phase(name, data, expectedVersion, conn, tId);
+			//		logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.OnePhase}");
+			//		break;
+			//	case AppendStrategy.OnePhaseNoVersionCheck:
+			//		_appendMethod = (name, data, expectedVersion, conn, tId) => Append1PhaseNoVersionCheck(name, data, expectedVersion, conn);
+			//		logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.OnePhaseNoVersionCheck}");
+			//		break;
+			//	default:
+			//		_appendMethod = Append2Phases;
+			//		logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.TwoPhases}");
+			//		break;
+			//}
 
 		}
 
@@ -69,24 +73,24 @@ namespace Bonanza.Storage.Timescale
 				conn.Open();
 				const string createExtension = @"CREATE EXTENSION IF NOT EXISTS timescaledb;";
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
-				const string createTable = @"CREATE TABLE es_events (id SERIAL NOT NULL, name TEXT NOT NULL, version INT NOT NULL, data BYTEA NOT NULL);";
-				const string createHyperTable = @"SELECT create_hypertable('es_events', 'id',chunk_time_interval => 100000);";
+				const string createTable = @"CREATE TABLE es_events ( time TIMESTAMPTZ NOT NULL,id SERIAL NOT NULL, tenantid INT NOT NULL, name TEXT NOT NULL, version INT NOT NULL, data BYTEA NOT NULL);";
+				const string createHyperTable = @"SELECT create_hypertable('es_events', 'time');";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
-CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
+CREATE OR REPLACE FUNCTION AppendEvent(tId int, expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
 $$ -- here start procedural part
    DECLARE currentVer int;
    BEGIN
 		SELECT INTO currentVer COALESCE(MAX(version),-1)
 				FROM public.es_events
-				WHERE name = aggregateName;
+				WHERE tenantId = tId and name = aggregateName;
 		IF expectedVersion <> -1 THEN
 			IF currentVer <> expectedVersion THEN
 				RETURN currentVer;
 			END IF;
 		END IF;
-		INSERT INTO public.es_events (Name,Version,Data) VALUES(aggregateName,currentVer+1,data);
+		INSERT INTO public.es_events (time,Tenantid,Name,Version,Data) VALUES(NOW(),tId,aggregateName,currentVer+1,data);
 				RETURN currentVer;
 				--RETURN 0;
    END;
@@ -121,7 +125,7 @@ LANGUAGE plpgsql; -- language specification ";
 
 		}
 
-		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection )
+		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection, int tenantId=0)
 		{
 			if (cacheConnection)
 			{
@@ -129,7 +133,7 @@ LANGUAGE plpgsql; -- language specification ";
 				try
 				{
 					conn = GetFromCacheOrNew();
-					_appendMethod(name, data, expectedVersion, conn);
+					_appendMethod(name, data, expectedVersion, conn, tenantId);
 				}
 				finally
 				{
@@ -144,7 +148,7 @@ LANGUAGE plpgsql; -- language specification ";
 				using (var conn = new NpgsqlConnection(_connectionString))
 				{
 					conn.Open();
-					_appendMethod(name, data, expectedVersion, conn);
+					_appendMethod(name, data, expectedVersion, conn, tenantId);
 				}
 			}
 		}
@@ -175,6 +179,7 @@ LANGUAGE plpgsql; -- language specification ";
 			return conn;
 		}
 
+		//todo implement select with tenants
 		public IEnumerable<DataWithVersion> ReadRecords(string name, long afterVersion, int maxCount)
 		{
 			using (var conn = new NpgsqlConnection(_connectionString))
@@ -203,6 +208,7 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
+		//todo implement select with tenants
 		public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
 		{
             using (var conn = new NpgsqlConnection(_connectionString))
@@ -241,6 +247,7 @@ LANGUAGE plpgsql; -- language specification ";
 			throw new NotImplementedException();
 		}
 
+		//todo implement select with tenants
 		public void Append2Phases(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
 		{
 			using (var tx = conn.BeginTransaction())
@@ -281,17 +288,18 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
-		public void Append1Phase(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		public void Append1Phase(string name, byte[] data, long expectedVersion, NpgsqlConnection conn, int tenantId = 0)
 		{
 			using (var tx = conn.BeginTransaction())
 			{
 				const string sql =
-					@"SELECT appendevent(@expectedVersion,@name,@data)";
+					@"SELECT appendevent(@tId,@expectedVersion,@name,@data)";
 
 				int version;
 				using (var cmd = new NpgsqlCommand(sql, conn, tx))
 				{
 					cmd.Parameters.AddWithValue("@name", name);
+					cmd.Parameters.AddWithValue("@tId", tenantId);
 					cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
 					cmd.Parameters.AddWithValue("@data", data);
 					version = (int)cmd.ExecuteScalar();
