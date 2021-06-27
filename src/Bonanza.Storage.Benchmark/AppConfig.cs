@@ -50,5 +50,6 @@ namespace Bonanza.Storage.Benchmark
 		PostgreSql,
 		TimescaleDb,
 		SqLite,
+		Lmdb,
 	}
 }

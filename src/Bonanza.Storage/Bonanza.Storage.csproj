@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LightningDB" Version="0.13.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.7" />
     <PackageReference Include="Npgsql" Version="5.0.5" />
     <PackageReference Include="Serilog" Version="2.10.0" />
