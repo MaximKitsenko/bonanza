@@ -26,11 +26,13 @@ namespace Bonanza.Storage.SqLite
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
 		private Action<string, byte[], long, SqliteConnection> _appendMethod;
+		private bool _cacheConnection;
 
-		public SqLiteEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy)
+		public SqLiteEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			_cacheConnection = cacheConnection;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<SqliteConnection>();
 			switch (strategy)
@@ -104,9 +106,9 @@ LANGUAGE plpgsql; -- language specification ";
 
 		}
 
-		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection, int tenantId)
+		public void Append(string name, byte[] data, long expectedVersion, int tenantId)
 		{
-			if (cacheConnection)
+			if (_cacheConnection)
 			{
 				SqliteConnection conn = null;
 				try

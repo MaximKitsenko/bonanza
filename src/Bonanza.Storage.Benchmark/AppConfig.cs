@@ -26,6 +26,7 @@ namespace Bonanza.Storage.Benchmark
 		public AppendStrategy Strategy { get; set; }
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
+		public bool CacheConnection { get; set; }
 	}
 
 	public class TimescaleDbEventStoreConfig
@@ -33,6 +34,7 @@ namespace Bonanza.Storage.Benchmark
 		public AppendStrategy Strategy { get; set; }
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
+		public bool CacheConnection { get; set; }
 	}
 
 	public class SqLiteEventStoreConfig
@@ -40,6 +42,7 @@ namespace Bonanza.Storage.Benchmark
 		public AppendStrategy Strategy { get; set; }
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
+		public bool CacheConnection { get; set; }
 	}
 
 	public enum EngineEnum

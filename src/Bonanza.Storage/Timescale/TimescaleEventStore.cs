@@ -24,6 +24,7 @@ namespace Bonanza.Storage.Timescale
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
 		private Action<string, byte[], long, NpgsqlConnection, int> _appendMethod;
+		private bool _cacheConnection;
 
 		private Action<string, byte[], long, NpgsqlConnection, int> ChooseStrategy(AppendStrategy strategy)
 		{
@@ -38,10 +39,11 @@ namespace Bonanza.Storage.Timescale
 			return choosenStrategy;
 		}
 
-		public TimescaleEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy)
+		public TimescaleEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			_cacheConnection = cacheConnection;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 
@@ -125,9 +127,9 @@ LANGUAGE plpgsql; -- language specification ";
 
 		}
 
-		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection, int tenantId=0)
+		public void Append(string name, byte[] data, long expectedVersion, int tenantId)
 		{
-			if (cacheConnection)
+			if (_cacheConnection)
 			{
 				NpgsqlConnection conn = null;
 				try

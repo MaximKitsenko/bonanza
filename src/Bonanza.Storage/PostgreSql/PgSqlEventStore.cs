@@ -24,6 +24,7 @@ namespace Bonanza.Storage.PostgreSql
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
 		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
+		private bool _cacheConnection;
 
 		private Action<string, byte[], long, NpgsqlConnection> ChooseStrategy(AppendStrategy strategy)
 		{
@@ -38,10 +39,11 @@ namespace Bonanza.Storage.PostgreSql
 			return choosenStrategy;
 		}
 
-		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy)
+		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			_cacheConnection = cacheConnection;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 			_appendMethod = ChooseStrategy(strategy);
@@ -101,9 +103,9 @@ LANGUAGE plpgsql; -- language specification ";
 
 		}
 
-		public void Append(string name, byte[] data, long expectedVersion, bool cacheConnection, int tenantId)
+		public void Append(string name, byte[] data, long expectedVersion, int tenantId)
 		{
-			if (cacheConnection)
+			if (_cacheConnection)
 			{
 				NpgsqlConnection conn = null;
 				try
@@ -263,42 +265,55 @@ LANGUAGE plpgsql; -- language specification ";
 
 		public void Append1Phase(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
 		{
-			using (var tx = conn.BeginTransaction())
+			try
 			{
-				const string sql =
-					@"SELECT appendevent(@expectedVersion,@name,@data)";
-
-				int version;
-				using (var cmd = new NpgsqlCommand(sql, conn, tx))
+				using (var tx = conn.BeginTransaction())
 				{
-					cmd.Parameters.AddWithValue("@name", name);
-					cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
-					cmd.Parameters.AddWithValue("@data", data);
-					version = (int)cmd.ExecuteScalar();
-					if (expectedVersion != -1)
+					const string sql =
+						@"SELECT appendevent(@expectedVersion,@name,@data)";
+
+					int version;
+					using (var cmd = new NpgsqlCommand(sql, conn, tx))
 					{
-						if (version != expectedVersion)
+						cmd.Parameters.AddWithValue("@name", name);
+						cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
+						cmd.Parameters.AddWithValue("@data", data);
+						version = (int)cmd.ExecuteScalar();
+						if (expectedVersion != -1)
 						{
-							throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
+							if (version != expectedVersion)
+							{
+								throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
+							}
 						}
 					}
-				}
-				/*
-				const string txt =
-					@"INSERT INTO public.es_events (Name,Version,Data) 
-                                VALUES(@name, @version, @data)";
 
-				using (var cmd = new NpgsqlCommand(txt, conn, tx))
-				{
-					cmd.Parameters.AddWithValue("@name", name);
-					cmd.Parameters.AddWithValue("@version", version + 1);
-					cmd.Parameters.AddWithValue("@data", data);
-					cmd.ExecuteNonQuery();
+					/*
+					const string txt =
+						@"INSERT INTO public.es_events (Name,Version,Data) 
+									VALUES(@name, @version, @data)";
+
+					using (var cmd = new NpgsqlCommand(txt, conn, tx))
+					{
+						cmd.Parameters.AddWithValue("@name", name);
+						cmd.Parameters.AddWithValue("@version", version + 1);
+						cmd.Parameters.AddWithValue("@data", data);
+						cmd.ExecuteNonQuery();
+					}
+					*/
+					tx.Commit();
+					Interlocked.Increment(ref appendCount);
+					WriteAppendsCountIntoLog();
 				}
-				*/
-				tx.Commit();
-				Interlocked.Increment(ref appendCount);
-				WriteAppendsCountIntoLog();
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "error occured during append");
+				throw;
+			}
+			finally
+			{
+				//_logger.Information("Test!!!");
 			}
 		}
 

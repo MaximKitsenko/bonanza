@@ -38,7 +38,8 @@ namespace Bonanza.Storage.Benchmark
 				config.BenchmarkConfig.EventCountInStream,
 				config.BenchmarkConfig.EventsInBatchPrefixName,
 				config.BenchmarkConfig.DataSize, 
-				eventStore);
+				eventStore, 
+				false);
 
 			//while (true)
 			{
@@ -55,28 +56,33 @@ namespace Bonanza.Storage.Benchmark
 						config.SqLiteEventStoreConfig.ConnectionString,
 						Log.Logger,
 						config.SqLiteEventStoreConfig.LogEveryNEvents,
-						config.SqLiteEventStoreConfig.Strategy)
+						config.SqLiteEventStoreConfig.Strategy,
+						config.SqLiteEventStoreConfig.CacheConnection)
 					.Initialize(config.BenchmarkConfig.DropDb),
 
 				EngineEnum.PostgreSql => new PostgreSql.PgSqlEventStore(
 						config.PgSqlEventStoreConfig.ConnectionString,
 						Log.Logger,
 						config.PgSqlEventStoreConfig.LogEveryNEvents,
-						config.PgSqlEventStoreConfig.Strategy)
+						config.PgSqlEventStoreConfig.Strategy,
+						config.PgSqlEventStoreConfig.CacheConnection)
 					.Initialize(config.BenchmarkConfig.DropDb),
 
 				EngineEnum.TimescaleDb => new Timescale.TimescaleEventStore(
 						config.TimescaleDbEventStoreConfig.ConnectionString,
 						Log.Logger,
 						config.TimescaleDbEventStoreConfig.LogEveryNEvents,
-						config.TimescaleDbEventStoreConfig.Strategy)
+						config.TimescaleDbEventStoreConfig.Strategy,
+						config.TimescaleDbEventStoreConfig.CacheConnection
+						)
 					.Initialize(config.BenchmarkConfig.DropDb),
 
 				_ => new PostgreSql.PgSqlEventStore(
 						config.PgSqlEventStoreConfig.ConnectionString,
 						Log.Logger,
 						config.PgSqlEventStoreConfig.LogEveryNEvents,
-						config.PgSqlEventStoreConfig.Strategy)
+						config.PgSqlEventStoreConfig.Strategy,
+						config.PgSqlEventStoreConfig.CacheConnection)
 					.Initialize(config.BenchmarkConfig.DropDb)
 			};
 		}

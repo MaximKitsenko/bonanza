@@ -61,7 +61,7 @@ namespace Bonanza.Storage
 		void Append(string name,
 			byte[] data,
 			long expectedVersion,
-			bool cacheConnection, int tenantId);
+			int tenantId);
 	}
 
 	public class DataWithVersion
