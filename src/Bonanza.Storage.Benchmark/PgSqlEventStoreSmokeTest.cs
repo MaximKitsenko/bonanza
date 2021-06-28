@@ -14,11 +14,11 @@ using Serilog;
 
 namespace Bonanza.Storage.Benchmark
 {
-	public class PgSqlEventStoreTest2
+	public class PgSqlEventStoreSmokeTest
 	{
 		private readonly ILogger _logger;
 
-		public PgSqlEventStoreTest2(ILogger logger)
+		public PgSqlEventStoreSmokeTest(ILogger logger)
 		{
 			_logger = logger;
 		}

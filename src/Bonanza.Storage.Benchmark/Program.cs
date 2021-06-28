@@ -28,7 +28,7 @@ namespace Bonanza.Storage.Benchmark
 			var config = GetTypedConfiguration(configuration);
 			ConfigureLogging(configuration);
 
-			var test = new PgSqlEventStoreTest2(Log.Logger);
+			var test = new PgSqlEventStoreSmokeTest(Log.Logger);
 
 			var eventStore = CreateEventStore(config);
 

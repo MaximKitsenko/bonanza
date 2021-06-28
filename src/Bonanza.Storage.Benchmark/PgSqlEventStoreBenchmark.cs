@@ -13,7 +13,7 @@ using Bonanza.Storage.PostgreSql;
 namespace Bonanza.Storage.Benchmark
 {
 	[MarkdownExporter, AsciiDocExporter, HtmlExporter, CsvExporter, RPlotExporter]
-	public class PgSqlEventStoreTest
+	public class PgSqlEventStoreBenchmark
 	{
 		private byte[][] data = new byte[3][];
 		private Dictionary<string, StreamNameAndVersion> aggregatesIds;
@@ -27,7 +27,7 @@ namespace Bonanza.Storage.Benchmark
 		//[Params(0, 1, 2)]
 		public DataSizeEnum DataSize { get; set; }
 
-		public PgSqlEventStoreTest()
+		public PgSqlEventStoreBenchmark()
 		{
 			Console.WriteLine("qwe");
 			// data in bytes;
