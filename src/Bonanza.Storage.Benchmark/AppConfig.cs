@@ -13,12 +13,14 @@ namespace Bonanza.Storage.Benchmark
 	public class BenchmarkConfig
 	{
 		public int BatchesCount { get; set; }
+		public int BatchesStartsFrom { get; set; }
 		public int DataSize { get; set; }
 		public int StreamsCountInBatch { get; set; }
 		public int EventCountInStream { get; set; }
 		public string EventsInBatchPrefixName { get; set; }
 		public bool DropDb { get; set; }
 		public EngineEnum Engine { get; set; }
+		public int StreamInBatchStartsFrom { get; set; }
 	}
 
 	public class PgSqlEventStoreConfig

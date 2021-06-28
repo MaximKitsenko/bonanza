@@ -34,10 +34,12 @@ namespace Bonanza.Storage.Benchmark
 
 			test.SendStreamBatchesToEventStore(
 				config.BenchmarkConfig.BatchesCount,
+				config.BenchmarkConfig.BatchesStartsFrom,
 				config.BenchmarkConfig.StreamsCountInBatch,
 				config.BenchmarkConfig.EventCountInStream,
 				config.BenchmarkConfig.EventsInBatchPrefixName,
-				config.BenchmarkConfig.DataSize, 
+				config.BenchmarkConfig.DataSize,
+				config.BenchmarkConfig.StreamInBatchStartsFrom,
 				eventStore, 
 				false);
 

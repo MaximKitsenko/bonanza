@@ -8,7 +8,7 @@ CREATE DATABASE "bonanza-dev-db"
 
 DROP TABLE IF EXISTS es_events;
 -- dont format these lines it's space-sensitive
-CREATE TABLE IF NOT EXISTS es_events (id SERIAL, tenantid INT NOT NULL,name VARCHAR (50) NOT NULL,version INT NOT NULL,data BYTEA NOT NULL) PARTITION BY RANGE(tenantid);
+CREATE TABLE IF NOT EXISTS es_events (id SERIAL, tenantid INT NOT NULL, name VARCHAR (50) NOT NULL,version INT NOT NULL,data BYTEA NOT NULL) PARTITION BY RANGE(tenantid);
 
 CREATE TABLE es_events_000_005 PARTITION OF es_events FOR VALUES FROM (MINVALUE) TO (5);
 CREATE TABLE es_events_005_010 PARTITION OF es_events FOR VALUES FROM (5) TO (10);

@@ -123,16 +123,18 @@ namespace Bonanza.Storage.Benchmark
 		}
 
 		public void SendStreamBatchesToEventStore(int batchesCount,
+			int batchesStartsFrom,
 			int streamsInBatchCount,
 			int eventCountPerStream,
-			string eventsInBatchPrefixName, 
-			int dataSize, 
-			IAppendOnlyStore eventStore, 
+			string eventsInBatchPrefixName,
+			int dataSize,
+			int streamInBatchStartsFrom,
+			IAppendOnlyStore eventStore,
 			bool cacheConnection)
 		{
 			var data = new byte[dataSize];
 			var tasks = new List<Task>();
-			for (var i = 0; i < batchesCount; i++)
+			for (var i = batchesStartsFrom; i < batchesStartsFrom+batchesCount; i++)
 			{
 				var temp = i;
 				var task = Task.Run((() => AppendBatchToEventStore(
@@ -140,6 +142,7 @@ namespace Bonanza.Storage.Benchmark
 					eventCountPerStream,
 					eventsInBatchPrefixName,
 					temp,
+					streamInBatchStartsFrom,
 					eventStore,
 					data)));
 				tasks.Add(task);
@@ -148,18 +151,18 @@ namespace Bonanza.Storage.Benchmark
 			Task.WaitAll(tasks.ToArray());
 		}
 
-		private static void AppendBatchToEventStore(
-			int streamsInBatchCount, 
+		private static void AppendBatchToEventStore(int streamsInBatchCount,
 			int eventCountPerStream,
-			string eventsInBatchPrefixName, 
-			int tenantId, 
-			IAppendOnlyStore eventStore, 
+			string eventsInBatchPrefixName,
+			int tenantId,
+			int streamInBatchStartsFrom,
+			IAppendOnlyStore eventStore,
 			byte[] data)
 		{
 			var streamNameAndVersion = new Dictionary<string, int>();
 			for (int j = 0; j < eventCountPerStream; j++)
 			{
-				for (int k = 0; k < streamsInBatchCount; k++)
+				for (int k = streamInBatchStartsFrom; k < streamInBatchStartsFrom + streamsInBatchCount; k++)
 				{
 					try
 					{

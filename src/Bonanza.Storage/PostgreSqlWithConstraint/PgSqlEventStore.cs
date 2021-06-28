@@ -6,7 +6,7 @@ using System.Threading;
 using Npgsql;
 using Serilog;
 
-namespace Bonanza.Storage.PostgreSql
+namespace Bonanza.Storage.PostgreSqlWithConstraint
 {
 	/// <summary>
 	/// <para>This is a SQL event storage for PgSql, simplified to demonstrate 
@@ -56,8 +56,8 @@ namespace Bonanza.Storage.PostgreSql
 			{
 				conn.Open();
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
-				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
-				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,tenantid INT NOT NULL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
+				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(tenantid,name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
