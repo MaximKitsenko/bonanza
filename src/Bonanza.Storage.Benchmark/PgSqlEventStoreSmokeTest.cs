@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Mime;
-using System.Text;
 using System.Threading.Tasks;
-using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Engines;
-using BenchmarkDotNet.Toolchains.Results;
 using Bonanza.Storage.Benchmark.TestData;
-using Bonanza.Storage.PostgreSql;
 using Serilog;
 
 namespace Bonanza.Storage.Benchmark
@@ -23,7 +16,11 @@ namespace Bonanza.Storage.Benchmark
 			_logger = logger;
 		}
 
-		public void SendStreamBatchToEventStore(StreamsBatch fromStreamsBatch, IAppendOnlyStore eventStore, int tenantId, bool cacheConnection)
+		public void SendStreamBatchToEventStore(
+			StreamsBatch fromStreamsBatch, 
+			IAppendOnlyStore eventStore, 
+			int tenantId, 
+			bool cacheConnection)
 		{
 			_logger.Information(
 				"Started {method}", 
@@ -56,7 +53,9 @@ namespace Bonanza.Storage.Benchmark
 				$"{nameof(SendStreamBatchToEventStore)}");
 		}
 
-		private void WriteLog(int eventsStored, Stopwatch sw)
+		private void WriteLog(
+			int eventsStored, 
+			Stopwatch sw)
 		{
 			const int batchSize = 1000;
 			if (eventsStored != 0 && eventsStored % batchSize == 0)
@@ -76,53 +75,8 @@ namespace Bonanza.Storage.Benchmark
 			}
 		}
 
-		public StreamsBatch[] GenerateStreamsBatches(int testCasesCount,
-			int streamsCount,
-			int eventsPerStream,
-			string streamNamePrefix, 
-			bool dropDb)
-		{
-			var testCases = new StreamsBatch[testCasesCount];
-			for (var i = 0; i < testCases.Length; i++)
-			{
-				testCases[i] = StreamsBatch.Generate(streamsCount, $"{streamNamePrefix}{i:D7}", eventsPerStream, dropDb, DataSizeEnum._1KByte);
-			}
-
-			return testCases;
-		}
-
-		public void SendPregeneratedStreamBatchesToEventStore(int batchesCount,
-			int streamsInBatchCount,
-			int eventCountPerStream,
-			string eventsInBatchPrefixName,
-			string eventStoreConnectionString,
-			bool dropEventStore, 
-			AppendStrategy strategy, 
-			bool cacheConnection)
-		{
-			var streamsBatches = GenerateStreamsBatches(
-				batchesCount,
-				streamsInBatchCount,
-				eventCountPerStream,
-				eventsInBatchPrefixName,
-				dropEventStore);
-
-			var eventStore = new PostgreSql.PgSqlEventStore(eventStoreConnectionString, null, 0, strategy, false).Initialize(dropEventStore);
-			//Task.Delay(10000).Wait(); // wait until db will be initialized ! no need since it's not async
-
-			var testRuns = new List<Task>();
-			for (int tenandId = 0; tenandId < streamsBatches.Length; tenandId++)
-			{
-				var streamsBatch = streamsBatches[tenandId];
-				var temp = tenandId;
-				//testRuns.Add(Task.Run(() => (new PgSqlEventStoreTest2(this._logger)).AppendManyEvents(testCases[temp], eventStore)));
-				testRuns.Add(Task.Run(() => this.SendStreamBatchToEventStore(streamsBatch, eventStore, temp, cacheConnection)));
-			}
-
-			Task.WaitAll(testRuns.ToArray());
-		}
-
-		public void SendStreamBatchesToEventStore(int batchesCount,
+		public void SendStreamBatchesToEventStore(
+			int batchesCount,
 			int batchesStartsFrom,
 			int streamsInBatchCount,
 			int eventCountPerStream,
@@ -150,7 +104,8 @@ namespace Bonanza.Storage.Benchmark
 			Task.WaitAll(tasks.ToArray());
 		}
 
-		private static void AppendBatchToEventStore(int streamsInBatchCount,
+		private static void AppendBatchToEventStore(
+			int streamsInBatchCount,
 			int eventCountPerStream,
 			string eventsInBatchPrefixName,
 			int tenantId,
