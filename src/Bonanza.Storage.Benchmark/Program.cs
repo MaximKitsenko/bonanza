@@ -40,8 +40,7 @@ namespace Bonanza.Storage.Benchmark
 				config.BenchmarkConfig.EventsInBatchPrefixName,
 				config.BenchmarkConfig.DataSize,
 				config.BenchmarkConfig.StreamInBatchStartsFrom,
-				eventStore, 
-				false);
+				eventStore);
 
 			//while (true)
 			{

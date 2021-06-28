@@ -129,8 +129,7 @@ namespace Bonanza.Storage.Benchmark
 			string eventsInBatchPrefixName,
 			int dataSize,
 			int streamInBatchStartsFrom,
-			IAppendOnlyStore eventStore,
-			bool cacheConnection)
+			IAppendOnlyStore eventStore)
 		{
 			var data = new byte[dataSize];
 			var tasks = new List<Task>();
