@@ -69,6 +69,14 @@ namespace Bonanza.Storage.Benchmark
 						config.PgSqlEventStoreConfig.CacheConnection)
 					.Initialize(config.BenchmarkConfig.DropDb),
 
+				EngineEnum.PgSqlConstrained => new Bonanza.Storage.PostgreSqlWithConstraint.PgSqlConstrainedEventStore(
+						config.PgSqlConstrainedEventStoreConfig.ConnectionString,
+						Log.Logger,
+						config.PgSqlConstrainedEventStoreConfig.LogEveryNEvents,
+						config.PgSqlConstrainedEventStoreConfig.Strategy,
+						config.PgSqlConstrainedEventStoreConfig.CacheConnection)
+					.Initialize(config.BenchmarkConfig.DropDb),
+
 				EngineEnum.TimescaleDb => new Timescale.TimescaleEventStore(
 						config.TimescaleDbEventStoreConfig.ConnectionString,
 						Log.Logger,

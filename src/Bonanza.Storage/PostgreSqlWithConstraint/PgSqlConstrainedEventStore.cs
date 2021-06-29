@@ -15,7 +15,7 @@ namespace Bonanza.Storage.PostgreSqlWithConstraint
 	/// Jonathan Oliver</para>
 	/// <para>This code is frozen to match IDDD book. For latest practices see Lokad.CQRS Project</para>
 	/// </summary>
-	public sealed class PgSqlEventStore : IAppendOnlyStore
+	public sealed class PgSqlConstrainedEventStore : IAppendOnlyStore
 	{
 		readonly string _connectionString;
 		private ConcurrentQueue<NpgsqlConnection> _connections;
@@ -23,12 +23,13 @@ namespace Bonanza.Storage.PostgreSqlWithConstraint
 		private int _logEveryEventsCount;
 		private int appendCount = 0;
 		private Stopwatch sw = Stopwatch.StartNew();
-		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
+		private AppendMethod _appendMethod;
+		private delegate void AppendMethod( long tenantId, string streamName, byte[] data, long expectedVersion, NpgsqlConnection connection);
 		private bool _cacheConnection;
 
-		private Action<string, byte[], long, NpgsqlConnection> ChooseStrategy(AppendStrategy strategy)
+		private AppendMethod ChooseStrategy(AppendStrategy strategy)
 		{
-			var dict = new Dictionary<AppendStrategy, Action<string, byte[], long, NpgsqlConnection>>()
+			var dict = new Dictionary<AppendStrategy, AppendMethod>()
 			{
 				{AppendStrategy.OnePhase, Append1Phase},
 				{AppendStrategy.OnePhaseNoVersionCheck, Append1PhaseNoVersionCheck},
@@ -39,7 +40,7 @@ namespace Bonanza.Storage.PostgreSqlWithConstraint
 			return choosenStrategy;
 		}
 
-		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public PgSqlConstrainedEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
@@ -47,10 +48,10 @@ namespace Bonanza.Storage.PostgreSqlWithConstraint
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 			_appendMethod = ChooseStrategy(strategy);
-			logger.Information($"[PgSqlEventStore] strategy used: {strategy.ToString()}");
+			logger.Information($"[{this.GetType().ToString()}] strategy used: {strategy.ToString()}");
 		}
 
-		public PgSqlEventStore Initialize(bool dropDb)
+		public PgSqlConstrainedEventStore Initialize(bool dropDb)
 		{
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
@@ -59,20 +60,12 @@ namespace Bonanza.Storage.PostgreSqlWithConstraint
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,tenantid INT NOT NULL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(tenantid,name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
-CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
+CREATE OR REPLACE FUNCTION AppendEvent(tenantId bigint, expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
 $$ -- here start procedural part
    DECLARE currentVer int;
    BEGIN
-		SELECT INTO currentVer COALESCE(MAX(version),-1)
-				FROM public.es_events
-				WHERE name = aggregateName;
-		IF expectedVersion <> -1 THEN
-			IF currentVer <> expectedVersion THEN
-				RETURN currentVer;
-			END IF;
-		END IF;
-		INSERT INTO public.es_events (Name,Version,Data) VALUES(aggregateName,currentVer+1,data);
+		INSERT INTO public.es_events (tenantId,Name,Version,Data) VALUES(tenantId,aggregateName,currentVer+1,data);
 				RETURN currentVer;
 				--RETURN 0;
    END;
@@ -91,7 +84,7 @@ LANGUAGE plpgsql; -- language specification ";
 
 				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
 				{
-					cmd.ExecuteNonQuery();
+					//cmd.ExecuteNonQuery();
 				}
 			}
 
@@ -111,7 +104,7 @@ LANGUAGE plpgsql; -- language specification ";
 				try
 				{
 					conn = GetFromCacheOrNew();
-					_appendMethod(name, data, expectedVersion, conn);
+					_appendMethod(tenantId, name, data, expectedVersion, conn);
 				}
 				finally
 				{
@@ -126,7 +119,7 @@ LANGUAGE plpgsql; -- language specification ";
 				using (var conn = new NpgsqlConnection(_connectionString))
 				{
 					conn.Open();
-					_appendMethod(name, data, expectedVersion, conn);
+					_appendMethod(tenantId, name, data, expectedVersion, conn);
 				}
 			}
 		}
@@ -223,7 +216,7 @@ LANGUAGE plpgsql; -- language specification ";
 			throw new NotImplementedException();
 		}
 
-		public void Append2Phases(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		public void Append2Phases(long tenantId, string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
 		{
 			using (var tx = conn.BeginTransaction())
 			{
@@ -263,29 +256,30 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
-		public void Append1Phase(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		public void Append1Phase(long tenantId, string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
 		{
 			try
 			{
 				using (var tx = conn.BeginTransaction())
 				{
 					const string sql =
-						@"SELECT appendevent(@expectedVersion,@name,@data)";
+						@"SELECT appendevent(@tenantId,@expectedVersion,@name,@data)";
 
 					int version;
 					using (var cmd = new NpgsqlCommand(sql, conn, tx))
 					{
 						cmd.Parameters.AddWithValue("@name", name);
+						cmd.Parameters.AddWithValue("@tenantId", tenantId);
 						cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
 						cmd.Parameters.AddWithValue("@data", data);
 						version = (int)cmd.ExecuteScalar();
-						if (expectedVersion != -1)
-						{
-							if (version != expectedVersion)
-							{
-								throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
-							}
-						}
+						//if (expectedVersion != -1)
+						//{
+						//	if (version != expectedVersion)
+						//	{
+						//		throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
+						//	}
+						//}
 					}
 
 					/*
@@ -317,7 +311,7 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 		}
 
-		public void Append1PhaseNoVersionCheck(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
+		public void Append1PhaseNoVersionCheck(long tenantId, string name, byte[] data, long expectedVersion, NpgsqlConnection conn)
 		{
 			using (var tx = conn.BeginTransaction())
 			{

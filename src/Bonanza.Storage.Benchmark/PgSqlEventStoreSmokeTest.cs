@@ -120,7 +120,7 @@ namespace Bonanza.Storage.Benchmark
 				{
 					try
 					{
-						var streamName = $"{eventsInBatchPrefixName}-tenant-{tenantId:D5}-stream-{k:D7}";
+						var streamName = $"order-{k:D7}";
 						if (!streamNameAndVersion.TryGetValue(streamName, out var version))
 						{
 							version = -1;
@@ -130,6 +130,7 @@ namespace Bonanza.Storage.Benchmark
 					}
 					catch (Exception e)
 					{
+						Log.Error(e,"error occured during append");
 						Console.WriteLine(e);
 						throw;
 					}

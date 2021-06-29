@@ -6,6 +6,7 @@ namespace Bonanza.Storage.Benchmark
 	{
 		public BenchmarkConfig BenchmarkConfig { get; set; }
 		public PgSqlEventStoreConfig PgSqlEventStoreConfig { get; set; }
+		public PgSqlConstrainedEventStoreConfig PgSqlConstrainedEventStoreConfig { get; set; }
 		public TimescaleDbEventStoreConfig TimescaleDbEventStoreConfig { get; set; }
 		public SqLiteEventStoreConfig SqLiteEventStoreConfig { get; set; }
 	}
@@ -24,6 +25,14 @@ namespace Bonanza.Storage.Benchmark
 	}
 
 	public class PgSqlEventStoreConfig
+	{
+		public AppendStrategy Strategy { get; set; }
+		public string ConnectionString { get; set; }
+		public int LogEveryNEvents { get; set; }
+		public bool CacheConnection { get; set; }
+	}
+
+	public class PgSqlConstrainedEventStoreConfig
 	{
 		public AppendStrategy Strategy { get; set; }
 		public string ConnectionString { get; set; }
@@ -50,6 +59,7 @@ namespace Bonanza.Storage.Benchmark
 	public enum EngineEnum
 	{
 		PostgreSql,
+		PgSqlConstrained,
 		TimescaleDb,
 		SqLite,
 		Lmdb,
