@@ -60,7 +60,7 @@ namespace Bonanza.Storage.PostgreSqlWithConstraint
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,tenantid INT NOT NULL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(tenantid,name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createFunction = @"
-CREATE OR REPLACE FUNCTION AppendEvent(tenantId bigint, expectedVersion bigint, aggregateName text, data bytea)
+CREATE OR REPLACE FUNCTION AppendEventConstrained(tenantId bigint, expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
 $$ -- here start procedural part
    DECLARE currentVer int;
@@ -263,7 +263,7 @@ LANGUAGE plpgsql; -- language specification ";
 				using (var tx = conn.BeginTransaction())
 				{
 					const string sql =
-						@"SELECT appendevent(@tenantId,@expectedVersion,@name,@data)";
+						@"SELECT AppendEventConstrained(@tenantId,@expectedVersion,@name,@data)";
 
 					int version;
 					using (var cmd = new NpgsqlCommand(sql, conn, tx))

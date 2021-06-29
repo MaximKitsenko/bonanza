@@ -2,11 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Npgsql;
 using Serilog;
 
-namespace Bonanza.Storage.PostgreSqlWith1Index
+namespace Bonanza.Storage.PostgreSql2Indexes
 {
 	/// <summary>
 	/// <para>This is a SQL event storage for PgSql, simplified to demonstrate 
@@ -15,7 +16,7 @@ namespace Bonanza.Storage.PostgreSqlWith1Index
 	/// Jonathan Oliver</para>
 	/// <para>This code is frozen to match IDDD book. For latest practices see Lokad.CQRS Project</para>
 	/// </summary>
-	public sealed class PgSql1IndexEventStore : IAppendOnlyStore
+	public sealed class PgSql2IndexesEventStore : IAppendOnlyStore
 	{
 		readonly string _connectionString;
 		private ConcurrentQueue<NpgsqlConnection> _connections;
@@ -40,7 +41,7 @@ namespace Bonanza.Storage.PostgreSqlWith1Index
 			return choosenStrategy;
 		}
 
-		public PgSql1IndexEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public PgSql2IndexesEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
@@ -48,20 +49,20 @@ namespace Bonanza.Storage.PostgreSqlWith1Index
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 			_appendMethod = ChooseStrategy(strategy);
-			logger.Information($"[PgSqlEventStore] strategy used: {strategy.ToString()}");
+			logger.Information($"[{this.GetType().ToString().Split('.').Last()}] strategy used: {strategy.ToString()}");
 		}
 
-		public PgSql1IndexEventStore Initialize(bool dropDb)
+		public PgSql2IndexesEventStore Initialize(bool dropDb)
 		{
 			using (var conn = new NpgsqlConnection(_connectionString))
 			{
 				conn.Open();
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,tenantid bigint,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
-				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(tenantId, name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
-				//const string createIdx2 = @"CREATE INDEX IF NOT EXISTS ""tenant-idx"" ON public.es_events USING btree(tenantId)TABLESPACE pg_default;";
+				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createIdx2 = @"CREATE INDEX IF NOT EXISTS ""tenant-idx"" ON public.es_events USING btree(tenantId)TABLESPACE pg_default;";
 				const string createFunction = @"
-CREATE OR REPLACE FUNCTION AppendEventWithOneIndex(tid bigint, expectedVersion bigint, aggregateName text, data bytea)
+CREATE OR REPLACE FUNCTION AppendEvent2Indexes(tid bigint, expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
 $$ -- here start procedural part
    DECLARE currentVer int;
@@ -84,11 +85,13 @@ LANGUAGE plpgsql; -- language specification ";
 				const string createTableSql = 
 				createTable 
 				+ createIdx 
+				+ createIdx2 
 				+ createFunction;
 				const string dropTableCreateTableSql = 
 					dropTable 
 					+ createTable 
 					+ createIdx 
+					+ createIdx2 
 					+ createFunction;
 
 				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
@@ -272,7 +275,7 @@ LANGUAGE plpgsql; -- language specification ";
 				using (var tx = conn.BeginTransaction())
 				{
 					const string sql =
-						@"SELECT AppendEventWithOneIndex(@tid,@expectedVersion,@name,@data)";
+						@"SELECT AppendEvent2Indexes(@tid,@expectedVersion,@name,@data)";
 
 					int version;
 					using (var cmd = new NpgsqlCommand(sql, conn, tx))
