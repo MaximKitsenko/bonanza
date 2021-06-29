@@ -59,7 +59,7 @@ namespace Bonanza.Storage.PostgreSql2Indexes
 				conn.Open();
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,tenantid bigint,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
-				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(tenantId, name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
 				const string createIdx2 = @"CREATE INDEX IF NOT EXISTS ""tenant-idx"" ON public.es_events USING btree(tenantId)TABLESPACE pg_default;";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent2Indexes(tid bigint, expectedVersion bigint, aggregateName text, data bytea)

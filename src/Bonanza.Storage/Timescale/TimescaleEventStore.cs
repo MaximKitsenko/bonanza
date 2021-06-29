@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Npgsql;
 using Serilog;
@@ -48,7 +49,7 @@ namespace Bonanza.Storage.Timescale
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 
 			_appendMethod = ChooseStrategy(strategy);
-			logger.Information($"[TimescaleDbEventStore] strategy used: {strategy.ToString()}");
+			logger.Information($"[{this.GetType().ToString().Split('.').Last()}] strategy used: {strategy.ToString()}");
 
 			//switch (strategy)
 			//{
