@@ -69,6 +69,22 @@ namespace Bonanza.Storage.Benchmark
 						config.PgSqlEventStoreConfig.CacheConnection)
 					.Initialize(config.BenchmarkConfig.DropDb),
 
+				EngineEnum.PostgreSql1Index => new PostgreSqlWith1Index.PgSql1IndexEventStore(
+						config.PgSql1IndexEventStoreConfig.ConnectionString,
+						Log.Logger,
+						config.PgSql1IndexEventStoreConfig.LogEveryNEvents,
+						config.PgSql1IndexEventStoreConfig.Strategy,
+						config.PgSql1IndexEventStoreConfig.CacheConnection)
+					.Initialize(config.BenchmarkConfig.DropDb),
+
+				EngineEnum.PostgreSql2Indexes => new PostgreSqlWith2Indexes.PgSqlWith2IndexesEventStore(
+						config.PgSql2IndexesEventStoreConfig.ConnectionString,
+						Log.Logger,
+						config.PgSql2IndexesEventStoreConfig.LogEveryNEvents,
+						config.PgSql2IndexesEventStoreConfig.Strategy,
+						config.PgSql2IndexesEventStoreConfig.CacheConnection)
+					.Initialize(config.BenchmarkConfig.DropDb),
+
 				EngineEnum.PgSqlConstrained => new Bonanza.Storage.PostgreSqlWithConstraint.PgSqlConstrainedEventStore(
 						config.PgSqlConstrainedEventStoreConfig.ConnectionString,
 						Log.Logger,
