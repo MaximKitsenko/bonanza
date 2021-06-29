@@ -50,23 +50,6 @@ namespace Bonanza.Storage.Timescale
 
 			_appendMethod = ChooseStrategy(strategy);
 			logger.Information($"[{this.GetType().ToString().Split('.').Last()}] strategy used: {strategy.ToString()}");
-
-			//switch (strategy)
-			//{
-			//	case AppendStrategy.OnePhase:
-			//		_appendMethod = (name, data, expectedVersion, conn, tId) => Append1Phase(name, data, expectedVersion, conn, tId);
-			//		logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.OnePhase}");
-			//		break;
-			//	case AppendStrategy.OnePhaseNoVersionCheck:
-			//		_appendMethod = (name, data, expectedVersion, conn, tId) => Append1PhaseNoVersionCheck(name, data, expectedVersion, conn);
-			//		logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.OnePhaseNoVersionCheck}");
-			//		break;
-			//	default:
-			//		_appendMethod = Append2Phases;
-			//		logger.Information($"[TimescaleDbEventStore] strategy used: {AppendStrategy.TwoPhases}");
-			//		break;
-			//}
-
 		}
 
 		public TimescaleEventStore Initialize(bool dropDb)
@@ -79,6 +62,7 @@ namespace Bonanza.Storage.Timescale
 				const string createTable = @"CREATE TABLE es_events ( time TIMESTAMPTZ NOT NULL,id SERIAL NOT NULL, tenantid INT NOT NULL, name TEXT NOT NULL, version INT NOT NULL, data BYTEA NOT NULL);";
 				const string createHyperTable = @"SELECT create_hypertable('es_events', 'time');";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createIdx2 = @"CREATE INDEX IF NOT EXISTS ""tenantId-idx"" ON public.es_events USING btree(tenantid)TABLESPACE pg_default;";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent(tId int, expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
@@ -105,6 +89,7 @@ LANGUAGE plpgsql; -- language specification ";
 					+ createTable 
 					+ createHyperTable
 					+ createIdx 
+					+ createIdx2 
 					+ createFunction;
 				const string dropTableCreateTableSql =
 					createExtension
@@ -112,6 +97,7 @@ LANGUAGE plpgsql; -- language specification ";
 					+ createTable 
 					+ createHyperTable
 					+ createIdx 
+					+ createIdx2 
 					+ createFunction;
 
 				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))

@@ -54,6 +54,10 @@ currently: `/var/lib/postgresql/data/postgresql.conf`
 
 view file: `less /var/lib/postgresql/data/postgresql.conf`
 
+### Get Db size
+
+SELECT pg_size_pretty( pg_database_size('bonanza-test-db') );
+
 ## Restart | Start |Stop Postgres server
 
 /etc/init.d/postgresql {start|stop|restart|reload|force-reload|status}
