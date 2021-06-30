@@ -40,7 +40,8 @@ namespace Bonanza.Storage.Timescale
 			return choosenStrategy;
 		}
 
-		public TimescaleEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public TimescaleEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
+			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;

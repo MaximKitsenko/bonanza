@@ -11,3 +11,8 @@ DROP TABLE IF EXISTS es_events;
 CREATE TABLE IF NOT EXISTS es_events (id SERIAL,name VARCHAR (50) NOT NULL,version INT NOT NULL,data BYTEA NOT NULL);
 
 -------------------------------------
+-- Query returned successfully in 37 min 44 secs.
+-- on 300M table
+CREATE INDEX IF NOT EXISTS "id-idx" ON public.es_events 
+USING btree(id)TABLESPACE pg_default;
+--

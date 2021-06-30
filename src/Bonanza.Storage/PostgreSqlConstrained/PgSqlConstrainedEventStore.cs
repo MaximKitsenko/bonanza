@@ -40,7 +40,8 @@ namespace Bonanza.Storage.PostgreSqlWithConstraint
 			return choosenStrategy;
 		}
 
-		public PgSqlConstrainedEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public PgSqlConstrainedEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
+			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;

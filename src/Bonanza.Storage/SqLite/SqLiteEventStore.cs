@@ -28,7 +28,8 @@ namespace Bonanza.Storage.SqLite
 		private Action<string, byte[], long, SqliteConnection> _appendMethod;
 		private bool _cacheConnection;
 
-		public SqLiteEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public SqLiteEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
+			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;

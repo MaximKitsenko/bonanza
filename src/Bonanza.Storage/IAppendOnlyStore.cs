@@ -62,6 +62,8 @@ namespace Bonanza.Storage
 			byte[] data,
 			long expectedVersion,
 			int tenantId);
+
+		bool TenantIdWithName { get; }
 	}
 
 	public class DataWithVersion

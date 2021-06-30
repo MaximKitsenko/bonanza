@@ -39,7 +39,8 @@ namespace Bonanza.Storage.PostgreSql
 			return choosenStrategy;
 		}
 
-		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
+			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
@@ -58,6 +59,7 @@ namespace Bonanza.Storage.PostgreSql
 				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
 				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
 				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createIdIdx = @"CREATE INDEX IF NOT EXISTS ""id-idx"" ON public.es_events USING btree(id)TABLESPACE pg_default;";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
@@ -82,11 +84,13 @@ LANGUAGE plpgsql; -- language specification ";
 				const string createTableSql = 
 				createTable 
 				+ createIdx 
+				+ createIdIdx
 				+ createFunction;
 				const string dropTableCreateTableSql = 
 					dropTable 
 					+ createTable 
 					+ createIdx 
+					+ createIdIdx
 					+ createFunction;
 
 				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))

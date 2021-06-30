@@ -32,6 +32,7 @@ namespace Bonanza.Storage.Benchmark
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
 		public bool CacheConnection { get; set; }
+		public bool TenantIdInStreamName { get; set; }
 	}
 
 	public class PgSql1IndexEventStoreConfig
@@ -40,6 +41,7 @@ namespace Bonanza.Storage.Benchmark
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
 		public bool CacheConnection { get; set; }
+		public bool TenantIdInStreamName { get; set; }
 	}
 
 	public class PgSqlEventStoreConfig
@@ -48,6 +50,7 @@ namespace Bonanza.Storage.Benchmark
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
 		public bool CacheConnection { get; set; }
+		public bool TenantIdInStreamName { get; set; }
 	}
 
 	public class PgSqlConstrainedEventStoreConfig
@@ -56,6 +59,7 @@ namespace Bonanza.Storage.Benchmark
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
 		public bool CacheConnection { get; set; }
+		public bool TenantIdInStreamName { get; set; }
 	}
 
 	public class TimescaleDbEventStoreConfig
@@ -64,6 +68,7 @@ namespace Bonanza.Storage.Benchmark
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
 		public bool CacheConnection { get; set; }
+		public bool TenantIdInStreamName { get; set; }
 	}
 
 	public class SqLiteEventStoreConfig
@@ -72,6 +77,7 @@ namespace Bonanza.Storage.Benchmark
 		public string ConnectionString { get; set; }
 		public int LogEveryNEvents { get; set; }
 		public bool CacheConnection { get; set; }
+		public bool TenantIdInStreamName { get; set; }
 	}
 
 	public enum EngineEnum

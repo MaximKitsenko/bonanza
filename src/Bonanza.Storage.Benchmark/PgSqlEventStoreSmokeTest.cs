@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Bonanza.Storage.Benchmark.TestData;
+using Bonanza.Storage.PostgreSql;
 using Serilog;
 
 namespace Bonanza.Storage.Benchmark
@@ -75,8 +76,7 @@ namespace Bonanza.Storage.Benchmark
 			}
 		}
 
-		public void SendStreamBatchesToEventStore(
-			int batchesCount,
+		public void SendStreamBatchesToEventStore(int batchesCount,
 			int batchesStartsFrom,
 			int streamsInBatchCount,
 			int eventCountPerStream,
@@ -120,7 +120,11 @@ namespace Bonanza.Storage.Benchmark
 				{
 					try
 					{
-						var streamName = $"order-{k:D7}";
+						var streamName =
+							eventStore.TenantIdWithName
+								? $"tenant-{tenantId:D7}order-{k:D7}"
+								: $"order-{k:D7}";
+
 						if (!streamNameAndVersion.TryGetValue(streamName, out var version))
 						{
 							version = -1;

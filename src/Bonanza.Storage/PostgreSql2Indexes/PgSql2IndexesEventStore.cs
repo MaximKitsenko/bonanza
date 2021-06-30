@@ -41,7 +41,8 @@ namespace Bonanza.Storage.PostgreSql2Indexes
 			return choosenStrategy;
 		}
 
-		public PgSql2IndexesEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public PgSql2IndexesEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
+			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;

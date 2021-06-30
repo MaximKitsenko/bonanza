@@ -41,7 +41,8 @@ namespace Bonanza.Storage.PostgreSqlWith1Index
 			return choosenStrategy;
 		}
 
-		public PgSql1IndexEventStore(string connectionString, ILogger logger, int logEveryEventsCount, AppendStrategy strategy, bool cacheConnection)
+		public PgSql1IndexEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
+			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
