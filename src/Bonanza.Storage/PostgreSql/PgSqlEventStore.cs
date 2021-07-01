@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Npgsql;
 using Serilog;
@@ -25,6 +26,7 @@ namespace Bonanza.Storage.PostgreSql
 		private Stopwatch sw = Stopwatch.StartNew();
 		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
 		private bool _cacheConnection;
+		public bool TenantIdWithName { get; }
 
 		private Action<string, byte[], long, NpgsqlConnection> ChooseStrategy(AppendStrategy strategy)
 		{
@@ -44,11 +46,12 @@ namespace Bonanza.Storage.PostgreSql
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			TenantIdWithName = tenantIdInStreamName;
 			_cacheConnection = cacheConnection;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
 			_appendMethod = ChooseStrategy(strategy);
-			logger.Information($"[PgSqlEventStore] strategy used: {strategy.ToString()}");
+			logger.Information($"[{this.GetType().ToString().Split('.').Last()}] strategy used: {strategy.ToString()}");
 		}
 
 		public PgSqlEventStore Initialize(bool dropDb)
@@ -134,6 +137,7 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 			}
 		}
+
 
 		private void WriteAppendsCountIntoLog()
 		{

@@ -27,12 +27,14 @@ namespace Bonanza.Storage.SqLite
 		private Stopwatch sw = Stopwatch.StartNew();
 		private Action<string, byte[], long, SqliteConnection> _appendMethod;
 		private bool _cacheConnection;
+		public bool TenantIdWithName { get; }
 
 		public SqLiteEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
 			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			TenantIdWithName = tenantIdInStreamName;
 			_cacheConnection = cacheConnection;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<SqliteConnection>();

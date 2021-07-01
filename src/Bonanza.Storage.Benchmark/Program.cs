@@ -67,7 +67,7 @@ namespace Bonanza.Storage.Benchmark
 						Log.Logger,
 						config.PgSqlEventStoreConfig.LogEveryNEvents,
 						config.PgSqlEventStoreConfig.Strategy,
-						config.PgSqlEventStoreConfig.TenantIdInStreamName,
+						config.PgSqlEventStoreConfig.TenantIdInStreamName, 
 						config.PgSqlEventStoreConfig.CacheConnection)
 					.Initialize(config.BenchmarkConfig.DropDb),
 
@@ -112,8 +112,8 @@ namespace Bonanza.Storage.Benchmark
 						config.PgSqlEventStoreConfig.ConnectionString,
 						Log.Logger,
 						config.PgSqlEventStoreConfig.LogEveryNEvents,
-						config.PgSqlEventStoreConfig.Strategy,
-						config.PgSqlEventStoreConfig.TenantIdInStreamName,
+						config.PgSqlEventStoreConfig.Strategy, 
+						config.PgSqlEventStoreConfig.TenantIdInStreamName, 
 						config.PgSqlEventStoreConfig.CacheConnection)
 					.Initialize(config.BenchmarkConfig.DropDb)
 			};

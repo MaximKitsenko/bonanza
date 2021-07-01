@@ -29,6 +29,7 @@ namespace Bonanza.Storage.Lmdb
 		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
 		private bool _cacheConnection;
 		private string _dbpath;
+		public bool TenantIdWithName { get; }
 
 		private Action<string, byte[], long, NpgsqlConnection> ChooseStrategy(AppendStrategy strategy)
 		{

@@ -27,6 +27,7 @@ namespace Bonanza.Storage.PostgreSqlWith1Index
 		private AppendMethod _appendMethod;
 		private delegate void AppendMethod(long tenantId, string streamName, byte[] data, long expectedVersion, NpgsqlConnection connection);
 		private bool _cacheConnection;
+		public bool TenantIdWithName { get; }
 
 		private AppendMethod ChooseStrategy(AppendStrategy strategy)
 		{
@@ -46,6 +47,7 @@ namespace Bonanza.Storage.PostgreSqlWith1Index
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			TenantIdWithName = tenantIdInStreamName;
 			_cacheConnection = cacheConnection;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();

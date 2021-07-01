@@ -26,6 +26,7 @@ namespace Bonanza.Storage.Timescale
 		private Stopwatch sw = Stopwatch.StartNew();
 		private Action<string, byte[], long, NpgsqlConnection, int> _appendMethod;
 		private bool _cacheConnection;
+		public bool TenantIdWithName { get; }
 
 		private Action<string, byte[], long, NpgsqlConnection, int> ChooseStrategy(AppendStrategy strategy)
 		{
@@ -45,6 +46,7 @@ namespace Bonanza.Storage.Timescale
 		{
 			_connectionString = connectionString;
 			_logger = logger;
+			TenantIdWithName = tenantIdInStreamName;
 			_cacheConnection = cacheConnection;
 			_logEveryEventsCount = logEveryEventsCount;
 			_connections = new ConcurrentQueue<NpgsqlConnection>();
