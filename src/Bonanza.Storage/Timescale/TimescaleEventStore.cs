@@ -61,11 +61,11 @@ namespace Bonanza.Storage.Timescale
 			{
 				conn.Open();
 				const string createExtension = @"CREATE EXTENSION IF NOT EXISTS timescaledb;";
-				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
-				const string createTable = @"CREATE TABLE es_events ( time TIMESTAMPTZ NOT NULL,id SERIAL NOT NULL, tenantid INT NOT NULL, name TEXT NOT NULL, version INT NOT NULL, data BYTEA NOT NULL);";
-				const string createHyperTable = @"SELECT create_hypertable('es_events', 'time');";
-				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
-				const string createIdx2 = @"CREATE INDEX IF NOT EXISTS ""tenantId-idx"" ON public.es_events USING btree(tenantid)TABLESPACE pg_default;";
+				const string dropTable = @"DROP TABLE IF EXISTS es_events_tsdb;";
+				const string createTable = @"CREATE TABLE es_events_tsdb ( time TIMESTAMPTZ NOT NULL,id SERIAL NOT NULL, tenantid INT NOT NULL, name TEXT NOT NULL, version INT NOT NULL, data BYTEA NOT NULL);";
+				const string createHyperTable = @"SELECT create_hypertable('es_events_tsdb', 'time');";
+				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events_tsdb USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
+				const string createIdx2 = "";//@"CREATE INDEX IF NOT EXISTS ""tenantId-idx"" ON public.es_events_tsdb USING btree(tenantid)TABLESPACE pg_default;";
 				const string createFunction = @"
 CREATE OR REPLACE FUNCTION AppendEvent(tId int, expectedVersion bigint, aggregateName text, data bytea)
 RETURNS int AS 
@@ -73,14 +73,14 @@ $$ -- here start procedural part
    DECLARE currentVer int;
    BEGIN
 		SELECT INTO currentVer COALESCE(MAX(version),-1)
-				FROM public.es_events
-				WHERE tenantId = tId and name = aggregateName;
+				FROM public.es_events_tsdb
+				WHERE name = aggregateName;
 		IF expectedVersion <> -1 THEN
 			IF currentVer <> expectedVersion THEN
 				RETURN currentVer;
 			END IF;
 		END IF;
-		INSERT INTO public.es_events (time,Tenantid,Name,Version,Data) VALUES(NOW(),tId,aggregateName,currentVer+1,data);
+		INSERT INTO public.es_events_tsdb (time,Tenantid,Name,Version,Data) VALUES(NOW(),tId,aggregateName,currentVer+1,data);
 				RETURN currentVer;
 				--RETURN 0;
    END;
@@ -178,7 +178,7 @@ LANGUAGE plpgsql; -- language specification ";
 			{
 				conn.Open();
 				const string sql =
-					@"SELECT Data,Version FROM ES_Events
+					@"SELECT Data,Version FROM es_events_tsdb
                         WHERE Name = @name AND version>@version
                         ORDER BY version
                         LIMIT @take OFFSET 0";
@@ -207,7 +207,7 @@ LANGUAGE plpgsql; -- language specification ";
             {
                 conn.Open();
                 const string sql =
-					@"SELECT Data, Name FROM ES_Events
+					@"SELECT Data, Name FROM es_events_tsdb
                         WHERE Id>@after
                         ORDER BY Id
                         LIMIT @take OFFSET 0";
@@ -246,7 +246,7 @@ LANGUAGE plpgsql; -- language specification ";
 			{
 				const string sql =
 					@"SELECT COALESCE (MAX(version),-1)
-                        FROM public.es_events
+                        FROM public.es_events_tsdb
                         WHERE name = @name;";
 				int version;
 				using (var cmd = new NpgsqlCommand(sql, conn, tx))
@@ -263,7 +263,7 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 
 				const string insertCmd =
-					@"INSERT INTO public.es_events (Name,Version,Data) 
+					@"INSERT INTO public.es_events_tsdb (Name,Version,Data) 
                             VALUES(@name, @version, @data)";
 
 				using (var cmd = new NpgsqlCommand(insertCmd, conn, tx))
@@ -305,7 +305,7 @@ LANGUAGE plpgsql; -- language specification ";
 				}
 				/*
 				const string txt =
-					@"INSERT INTO public.es_events (Name,Version,Data) 
+					@"INSERT INTO public.es_events_tsdb (Name,Version,Data) 
                                 VALUES(@name, @version, @data)";
 
 				using (var cmd = new NpgsqlCommand(txt, conn, tx))
@@ -348,7 +348,7 @@ LANGUAGE plpgsql; -- language specification ";
 
 				
 				const string txt =
-					@"INSERT INTO public.es_events (Name,Version,Data) 
+					@"INSERT INTO public.es_events_tsdb (Name,Version,Data) 
                                 VALUES(@name, @version, @data)";
 
 				using (var cmd = new NpgsqlCommand(txt, conn, tx))

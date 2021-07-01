@@ -122,7 +122,7 @@ namespace Bonanza.Storage.Benchmark
 					{
 						var streamName =
 							eventStore.TenantIdWithName
-								? $"tenant-{tenantId:D7}order-{k:D7}"
+								? $"tenant-{tenantId:D7}-order-{k:D7}"
 								: $"order-{k:D7}";
 
 						if (!streamNameAndVersion.TryGetValue(streamName, out var version))
