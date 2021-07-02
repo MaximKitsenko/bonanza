@@ -1,0 +1,24 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Неизвестный </title></head><body>
+<h1 id="prepare-postgres-for-dev">Prepare postgres for dev</h1>
+<h2 id="run-docker-container">Run docker container</h2>
+<p>In terminal go to folder where docker compose is stored, then:
+<code>docker-compose up</code></p>
+<h2 id="open-db-ui">Open DB UI</h2>
+<p>For accessing DB <code>pgadmin4</code> is used. Open your favorite web browser by vising the URL http://localhost:5050/. Use the admin@admin.com for the email address and root as the password to log in.</p>
+<h2 id="add-server">Add server</h2>
+<p>In <code>pgadmin4</code> select menu item: Servers &gt; Create &gt; Server.
+Fill fields 
+- name: <code>Bonanza-test-db</code>
+- hostname(connection tab): 
+- - get docker container id: <code>docker ps</code>.
+- - get docker container ip by id <code>docker inspect fcc97e066cc8 | grep IPAddress</code>
+- user: root
+- password: root</p>
+<h2 id="add-db">Add DB</h2>
+<p>Add db with name <code>bonanza-test-db</code> via UI</p>
+<h2 id="get-os-version">Get Os version</h2>
+<p>In docker, press button <code>cli</code> on docker container.
+In CLI: <code>uname -a</code>
+Current version is:
+<code>Linux 103e63f5d491 5.10.25-linuxkit #1 SMP Tue Mar 23 09:27:39 UTC 2021 x86_64 GNU/Linux</code></p>
+</body></html>
