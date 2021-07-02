@@ -2,7 +2,8 @@ version: '3.0'
 services:
   db:
     container_name: es_container
-    image: eventstore/eventstore:20.10.1-buster-slim
+    #image: eventstore/eventstore:20.10.1-buster-slim
+    image: eventstore/eventstore:20.10.2-buster-slim
     restart: always
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
