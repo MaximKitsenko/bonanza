@@ -3,11 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
+using EventStore.Client;
 using Npgsql;
 using Serilog;
 
-namespace Bonanza.Storage.PostgreSql
+namespace Bonanza.Storage.GregEventStore
 {
 	/// <summary>
 	/// <para>This is a SQL event storage for PgSql, simplified to demonstrate 
@@ -16,7 +18,7 @@ namespace Bonanza.Storage.PostgreSql
 	/// Jonathan Oliver</para>
 	/// <para>This code is frozen to match IDDD book. For latest practices see Lokad.CQRS Project</para>
 	/// </summary>
-	public sealed class PgSqlEventStore : IAppendOnlyStore
+	public sealed class GEventStore : IAppendOnlyStore
 	{
 		readonly string _connectionString;
 		private ConcurrentQueue<NpgsqlConnection> _connections;
@@ -27,6 +29,8 @@ namespace Bonanza.Storage.PostgreSql
 		private Action<string, byte[], long, NpgsqlConnection> _appendMethod;
 		private bool _cacheConnection;
 		public bool TenantIdWithName { get; }
+		//
+		EventStoreClient client;
 
 		private Action<string, byte[], long, NpgsqlConnection> ChooseStrategy(AppendStrategy strategy)
 		{
@@ -41,7 +45,7 @@ namespace Bonanza.Storage.PostgreSql
 			return choosenStrategy;
 		}
 
-		public PgSqlEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
+		public GEventStore(string connectionString, ILogger logger, int logEveryEventsCount,
 			AppendStrategy strategy, bool tenantIdInStreamName, bool cacheConnection)
 		{
 			_connectionString = connectionString;
@@ -54,53 +58,25 @@ namespace Bonanza.Storage.PostgreSql
 			logger.Information($"[{this.GetType().ToString().Split('.').Last()}] strategy used: {strategy.ToString()}");
 		}
 
-		public PgSqlEventStore Initialize(bool dropDb)
+		public GEventStore Initialize(bool dropDb)
 		{
-			using (var conn = new NpgsqlConnection(_connectionString))
-			{
-				conn.Open();
-				const string dropTable = @"DROP TABLE IF EXISTS es_events;";
-				const string createTable = @"CREATE TABLE IF NOT EXISTS es_events (Id SERIAL,Name VARCHAR (50) NOT NULL,Version INT NOT NULL,Data BYTEA NOT NULL);";
-				const string createIdx = @"CREATE INDEX IF NOT EXISTS ""name-idx"" ON public.es_events USING btree(name COLLATE pg_catalog.""default"" ASC NULLS LAST)TABLESPACE pg_default;";
-				const string createIdIdx = @"CREATE INDEX IF NOT EXISTS ""id-idx"" ON public.es_events USING btree(id)TABLESPACE pg_default;";
-				const string createFunction = @"
-CREATE OR REPLACE FUNCTION AppendEvent(expectedVersion bigint, aggregateName text, data bytea)
-RETURNS int AS 
-$$ -- here start procedural part
-   DECLARE currentVer int;
-   BEGIN
-		SELECT INTO currentVer COALESCE(MAX(version),-1)
-				FROM public.es_events
-				WHERE name = aggregateName;
-		IF expectedVersion <> -1 THEN
-			IF currentVer <> expectedVersion THEN
-				RETURN currentVer;
-			END IF;
-		END IF;
-		INSERT INTO public.es_events (Name,Version,Data) VALUES(aggregateName,currentVer+1,data);
-				RETURN currentVer;
-				--RETURN 0;
-   END;
-$$ -- here finish procedural part
-LANGUAGE plpgsql; -- language specification ";
+			//while (true)
+			//{
+			//	try
+			//	{
+					var esdbTlsTrue = "esdb://localhost:2114?tls=false";//"esdb://172.24.0.2:1114?tls=true";
+					var settings = EventStoreClientSettings
+						.Create(esdbTlsTrue);
+					client = new EventStoreClient(settings);
+			//		var r = client.ReadAllAsync(Direction.Forwards, Position.Start).ToListAsync();
+			//		var rList = r.Result;
+			//	}
+			//	catch (Exception e)
+			//	{
+			//		Console.WriteLine(e);
+			//	}
+			//}
 
-				const string createTableSql = 
-				createTable 
-				+ createIdx 
-				+ createIdIdx
-				+ createFunction;
-				const string dropTableCreateTableSql = 
-					dropTable 
-					+ createTable 
-					+ createIdx 
-					+ createIdIdx
-					+ createFunction;
-
-				using (var cmd = new NpgsqlCommand(dropDb? dropTableCreateTableSql:createTableSql, conn))
-				{
-					cmd.ExecuteNonQuery();
-				}
-			}
 
 			return this;
 		}
@@ -130,11 +106,7 @@ LANGUAGE plpgsql; -- language specification ";
 			}
 			else
 			{
-				using (var conn = new NpgsqlConnection(_connectionString))
-				{
-					conn.Open();
-					_appendMethod(name, data, expectedVersion, conn);
-				}
+					_appendMethod(name, data, expectedVersion, null);
 			}
 		}
 
@@ -275,44 +247,27 @@ LANGUAGE plpgsql; -- language specification ";
 		{
 			try
 			{
-				using (var tx = conn.BeginTransaction())
+				
+				var evt = new TestEvent
 				{
-					const string sql =
-						@"SELECT appendevent(@expectedVersion,@name,@data)";
+					EntityId = name,
+					ImportantData = "I wrote my first event!"
+				};
 
-					int version;
-					using (var cmd = new NpgsqlCommand(sql, conn, tx))
-					{
-						cmd.Parameters.AddWithValue("@name", name);
-						cmd.Parameters.AddWithValue("@expectedVersion", expectedVersion);
-						cmd.Parameters.AddWithValue("@data", data);
-						version = (int)cmd.ExecuteScalar();
-						if (expectedVersion != -1)
-						{
-							if (version != expectedVersion)
-							{
-								throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
-							}
-						}
-					}
+				var eventData = new EventData(
+					Uuid.NewUuid(),
+					"TestEvent",
+					data//JsonSerializer.SerializeToUtf8Bytes(evt)
+				);
 
-					/*
-					const string txt =
-						@"INSERT INTO public.es_events (Name,Version,Data) 
-									VALUES(@name, @version, @data)";
+				client.AppendToStreamAsync(
+					"orderx",
+					StreamState.Any,
+					new[] {eventData}
+				).GetAwaiter().GetResult();
 
-					using (var cmd = new NpgsqlCommand(txt, conn, tx))
-					{
-						cmd.Parameters.AddWithValue("@name", name);
-						cmd.Parameters.AddWithValue("@version", version + 1);
-						cmd.Parameters.AddWithValue("@data", data);
-						cmd.ExecuteNonQuery();
-					}
-					*/
-					tx.Commit();
-					Interlocked.Increment(ref appendCount);
-					WriteAppendsCountIntoLog();
-				}
+				 Interlocked.Increment(ref appendCount);
+				 WriteAppendsCountIntoLog(); ;
 			}
 			catch (Exception e)
 			{
@@ -369,4 +324,9 @@ LANGUAGE plpgsql; -- language specification ";
 		}
 	}
 
+	public class TestEvent
+	{
+		public string EntityId { get; set; }
+		public string ImportantData { get; set; }
+	}
 }

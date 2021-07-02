@@ -10,6 +10,7 @@ namespace Bonanza.Storage.Benchmark
 		public PgSql2IndexesEventStoreConfig PgSql2IndexesEventStoreConfig { get; set; }
 		public PgSqlConstrainedEventStoreConfig PgSqlConstrainedEventStoreConfig { get; set; }
 		public TimescaleDbEventStoreConfig TimescaleDbEventStoreConfig { get; set; }
+		public GEventStoreConfig GEventStoreConfig { get; set; }
 		public SqLiteEventStoreConfig SqLiteEventStoreConfig { get; set; }
 	}
 
@@ -24,6 +25,15 @@ namespace Bonanza.Storage.Benchmark
 		public bool DropDb { get; set; }
 		public EngineEnum Engine { get; set; }
 		public int StreamInBatchStartsFrom { get; set; }
+	}
+
+	public class GEventStoreConfig
+	{
+		public AppendStrategy Strategy { get; set; }
+		public string ConnectionString { get; set; }
+		public int LogEveryNEvents { get; set; }
+		public bool CacheConnection { get; set; }
+		public bool TenantIdInStreamName { get; set; }
 	}
 
 	public class PgSql2IndexesEventStoreConfig
@@ -87,6 +97,7 @@ namespace Bonanza.Storage.Benchmark
 		PostgreSql2Indexes,
 		PgSqlConstrained,
 		TimescaleDb,
+		GEventStore,
 		SqLite,
 		Lmdb,
 	}

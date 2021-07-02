@@ -108,6 +108,16 @@ namespace Bonanza.Storage.Benchmark
 						)
 					.Initialize(config.BenchmarkConfig.DropDb),
 
+				EngineEnum.GEventStore => new GregEventStore.GEventStore(
+						config.GEventStoreConfig.ConnectionString,
+						Log.Logger,
+						config.GEventStoreConfig.LogEveryNEvents,
+						config.GEventStoreConfig.Strategy,
+						config.GEventStoreConfig.TenantIdInStreamName,
+						config.GEventStoreConfig.CacheConnection
+					)
+					.Initialize(config.BenchmarkConfig.DropDb),
+
 				_ => new PostgreSql.PgSqlEventStore(
 						config.PgSqlEventStoreConfig.ConnectionString,
 						Log.Logger,

@@ -13,6 +13,7 @@
 | Postgres			| macBook		| 16Gb	| 6		| No		| mac			| 1500				|					|					|
 | TimeScale			| lenovo		| 9Gb	| 8		| No		| lenovo		| 2000				|					|					|
 | TimeScale			| azure-dev01	| 08Gb	| 2		| No		| azure-dev02	| 3000				|					|					|
+| EventStore		| lenovo		| 08Gb	| 6		| No		| lenovo		| 98				|	2000			|	66				|
 
 
 This formats starts writes 2500, 
