@@ -7,6 +7,7 @@
 | Postgres			| macBook		| 16Gb	| 6		| Yes		| mac			| 3500				|					|					|
 | Postgres			| macBook		| 16Gb	| 6		| Yes		| lenovo		| 1200				|					|					|
 | Postgres			| lenovo		| 16Gb	| 6		| Yes		| lenovo		| 2500				|					|					|
+| Postgres-id-idx	| azure-dev01	| 08Gb	| 2		| Yes		| azure-dev03	| 2700				|	100,000,000		|	1200			|
 | Postgres			| azure-dev01	| 08Gb	| 2		| Yes		| azure-dev02	| 4444				|	400,000,000		|	1200			|
 | Postgres-id-idx	| azure-dev01	| 08Gb	| 2		| Yes		| azure-dev02	| 2300				|	400,000,000		|	1200			|
 | Postgres			| azure-dev01	| 08Gb	| 2		| No		| azure-dev02	| 2000				|					|					|

@@ -107,7 +107,7 @@ namespace Bonanza.Storage.Benchmark
 		private static void AppendBatchToEventStore(
 			int streamsInBatchCount,
 			int eventCountPerStream,
-			string eventsInBatchPrefixName,
+			string streamNamePrefix,
 			int tenantId,
 			int streamInBatchStartsFrom,
 			IAppendOnlyStore eventStore,
@@ -122,8 +122,8 @@ namespace Bonanza.Storage.Benchmark
 					{
 						var streamName =
 							eventStore.TenantIdWithName
-								? $"tenant-{tenantId:D7}-order-{k:D7}"
-								: $"order-{k:D7}";
+								? $"tenant-{tenantId:D7}-{streamNamePrefix}-{k:D7}"
+								: $"{streamNamePrefix}-{k:D7}";
 
 						if (!streamNameAndVersion.TryGetValue(streamName, out var version))
 						{

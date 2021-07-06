@@ -37,7 +37,7 @@ namespace Bonanza.Storage.Benchmark
 				config.BenchmarkConfig.BatchesStartsFrom,
 				config.BenchmarkConfig.StreamsCountInBatch,
 				config.BenchmarkConfig.EventCountInStream,
-				config.BenchmarkConfig.EventsInBatchPrefixName,
+				config.BenchmarkConfig.StreamNamePrefix,
 				config.BenchmarkConfig.DataSize,
 				config.BenchmarkConfig.StreamInBatchStartsFrom,
 				eventStore);

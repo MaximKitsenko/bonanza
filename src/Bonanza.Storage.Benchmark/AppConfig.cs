@@ -21,7 +21,7 @@ namespace Bonanza.Storage.Benchmark
 		public int DataSize { get; set; }
 		public int StreamsCountInBatch { get; set; }
 		public int EventCountInStream { get; set; }
-		public string EventsInBatchPrefixName { get; set; }
+		public string StreamNamePrefix { get; set; }
 		public bool DropDb { get; set; }
 		public EngineEnum Engine { get; set; }
 		public int StreamInBatchStartsFrom { get; set; }

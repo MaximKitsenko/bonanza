@@ -9,6 +9,17 @@ ssh -i "E:\documents\Passwords\azure-key\mac-key" azurecat@20.102.99.1
 In terminal go to folder where docker compose is stored, then:
 `docker-compose up`
 
+## Copy file from stoped container
+
+docker cp 3f817b963d70:/var/lib/postgresql/data/postgresql.conf postgresql.conf
+
+## Disable restart container
+docker update --restart=no container
+
+## get contaier logs
+
+docker logs --tail 50 container
+
 ## Open DB UI
 
 For accessing DB `pgadmin4` is used. Open your favorite web browser by vising the URL http://localhost:5050/. Use the admin@admin.com for the email address and root as the password to log in.
