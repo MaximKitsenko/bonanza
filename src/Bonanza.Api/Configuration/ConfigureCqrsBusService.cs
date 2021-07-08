@@ -38,7 +38,7 @@ namespace Bonanza.Api.Configuration
 
 			var tenantsListProjection = new TenantsListProjection(bulshitDB);
 			bus.RegisterHandler<TenantCreated>(tenantsListProjection.Handle);
-			bus.RegisterHandler<TenantNameChanged>(tenantsListProjection.Handle);
+			bus.RegisterHandler<TenantRenamed>(tenantsListProjection.Handle);
 			//bus.RegisterHandler<UserCreated>(detail.Handle);
 
 			var serviceCommandSender = new ServiceDescriptor(

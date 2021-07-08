@@ -1,5 +1,5 @@
 ﻿using System;
-using Bonanza.Infrastructure.Abstractions;
+using Bonanza.Infrastructure;
 using FluentAssertions;
 
 namespace Bonanza.Contracts.ValueObjects.Tenant

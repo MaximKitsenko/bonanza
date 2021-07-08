@@ -2,7 +2,7 @@
 
 ## Connenct to VM via ssh
 
-ssh -i "E:\documents\Passwords\azure-key\mac-key" azurecat@20.102.99.1
+ssh -i "E:\documents\Passwords\sshkeys-dev01\bonanza-dev01_key.pem" azurecat@20.102.99.1
 
 ## Run docker container
 

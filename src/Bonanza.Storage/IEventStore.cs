@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
+using Bonanza.Infrastructure;
 
 namespace Bonanza.Storage
 {
 	public interface IEventStore
 	{
 		EventStream LoadEventStream(IIdentity id);
+
 		EventStream LoadEventStream(
 			IIdentity id,
 			long skipEvents,
 			int maxCount);
+
 		/// <summary>
 		/// Appends events to server stream for the provided
 		/// identity.

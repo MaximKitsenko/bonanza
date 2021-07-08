@@ -5,8 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Projections\IDocumentWriter.cs" />
+    <Compile Remove="Projections\TenantListProjection.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bonanza.Contracts\Bonanza.Contracts.csproj" />
     <ProjectReference Include="..\Bonanza.Infrastructure\Bonanza.Infrastructure.csproj" />
+    <ProjectReference Include="..\Bonanza.Storage\Bonanza.Storage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Projections\" />
   </ItemGroup>
 
 </Project>

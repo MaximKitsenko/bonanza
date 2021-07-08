@@ -4,7 +4,7 @@ using Bonanza.Infrastructure;
 
 namespace Bonanza.Contracts.Events
 {
-    public class TenantNameChanged : Event
+    public class TenantRenamed : IEvent
     {
         public TenantId TenantId { get; }
 
@@ -12,7 +12,7 @@ namespace Bonanza.Contracts.Events
 
         public SysInfo SysInfo { get; }
 
-        public TenantNameChanged(TenantId tenantId, TenantName newName, SysInfo sysInfo)
+        public TenantRenamed(TenantId tenantId, TenantName newName, TenantName oldName, SysInfo sysInfo)
         {
             TenantId = tenantId;
             NewName = newName;

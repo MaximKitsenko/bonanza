@@ -4,6 +4,7 @@ using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Linq;
+using Bonanza.Infrastructure;
 
 namespace Bonanza.Storage
 {

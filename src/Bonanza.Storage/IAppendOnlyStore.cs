@@ -58,11 +58,13 @@ namespace Bonanza.Storage
 
 		void Close();
 
+		// TODO: for test purpose only remove it 
 		void Append(string name,
 			byte[] data,
 			long expectedVersion,
 			int tenantId);
 
+		// TODO: for test purpose only remove it 
 		bool TenantIdWithName { get; }
 	}
 
