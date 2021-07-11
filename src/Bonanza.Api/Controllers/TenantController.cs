@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bonanza.Api.Controllers.TenantControllerDto;
 using Bonanza.Contracts.Commands;
 using Bonanza.Contracts.ValueObjects;
 using Bonanza.Contracts.ValueObjects.Tenant;
@@ -33,14 +34,14 @@ namespace Bonanza.Api.Controllers
 		}
 
 		[HttpGet]
-		public List<TenantListDto> Get()
+		public List<TenantForListDto> Get()
 		{
 			var r = _readModel.GetTenants();
 
 			return r.ToList();
 		}
 
-		public List<TenantListDto> Index()
+		public List<TenantForListDto> Index()
 		{
 			var r = _readModel.GetTenants();
 
@@ -77,6 +78,18 @@ namespace Bonanza.Api.Controllers
 
 			return RedirectToAction("Index");
 		}
+	}
+
+	public interface IReadModelFacade
+	{
+		IEnumerable<TenantForListDto> GetTenants();
+		InventoryItemDetailsDto GetInventoryItemDetails(Guid id);
+	}
+
+	public interface ICommandSender
+	{
+		void Send(RenameTenant command);
+		void Send(CreateTenant command);
 	}
 
 	public class CreateTenantRequest

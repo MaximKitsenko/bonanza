@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bonanza.Api.Controllers.TenantControllerDto;
 using Bonanza.Contracts.Commands;
 using Bonanza.Contracts.ValueObjects;
 using Bonanza.Contracts.ValueObjects.Tenant;
