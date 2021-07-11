@@ -4,7 +4,7 @@ using Bonanza.Infrastructure;
 
 namespace Bonanza.Contracts.Commands
 {
-    public class RenameTenant : Command
+    public class RenameTenant : ICommand
     {
         public readonly TenantId TenantId;
         public readonly TenantName TenantNewName;

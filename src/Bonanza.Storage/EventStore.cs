@@ -13,7 +13,7 @@ namespace Bonanza.Storage
 	/// provide bridge between event-centric domain code and 
 	/// byte-based append-only persistence
 	/// </summary>
-	class EventStore : IEventStore
+	public class EventStore : IEventStore
 	{
 		readonly BinaryFormatter _formatter =
 			new BinaryFormatter();

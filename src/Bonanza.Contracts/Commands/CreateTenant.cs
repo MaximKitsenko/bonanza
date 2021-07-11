@@ -7,7 +7,7 @@ using Bonanza.Infrastructure;
 
 namespace Bonanza.Contracts.Commands
 {
-    public class CreateTenant : Command
+    public class CreateTenant : ICommand
     {
         public readonly TenantId TenantId;
         public readonly TenantName TenantName;

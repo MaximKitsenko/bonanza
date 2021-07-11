@@ -17,7 +17,7 @@ namespace Bonanza.Domain.Aggregates.TenantAggregate
 	/// for accepting message calls (in form of web service calls or serialized
 	///  command messages) and dispatching them to these handlers.
 	/// </para></summary>
-	public sealed class CustomerApplicationService : IApplicationService
+	public sealed class TenantApplicationService : IApplicationService
 	{
 		// event store for accessing event streams
 		readonly IEventStore _eventStore;
@@ -25,12 +25,11 @@ namespace Bonanza.Domain.Aggregates.TenantAggregate
 		readonly IPricingService _pricingService;
 
 		// pass dependencies for this application service via constructor
-		public CustomerApplicationService(IEventStore eventStore, IPricingService pricingService)
+		public TenantApplicationService(IEventStore eventStore, IPricingService pricingService)
 		{
 			_eventStore = eventStore;
 			_pricingService = pricingService;
 		}
-
 
 		public void When(CreateTenant c)
 		{

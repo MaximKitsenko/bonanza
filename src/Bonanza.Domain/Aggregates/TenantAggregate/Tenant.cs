@@ -32,10 +32,10 @@ namespace Bonanza.Domain.Aggregates.TenantAggregate
 
 		void Apply(IEvent e)
 		{
-			// pass each event to modify current in-memory state
-			_state.Mutate(e);
 			// append event to change list for further persistence
 			Changes.Add(e);
+			// pass each event to modify current in-memory state
+			_state.Mutate(e);
 		}
 
 
