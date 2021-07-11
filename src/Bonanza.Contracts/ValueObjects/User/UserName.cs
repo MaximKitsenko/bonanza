@@ -1,7 +1,9 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 
 namespace Bonanza.Contracts.ValueObjects.User
 {
+	[Serializable]
 	public class UserName
 	{
 		public string Name { get; }

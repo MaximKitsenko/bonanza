@@ -1,9 +1,11 @@
-﻿using Bonanza.Infrastructure;
+﻿using System;
+using Bonanza.Infrastructure;
 using FluentAssertions;
 
 namespace Bonanza.Contracts.ValueObjects.User
 {
-    public sealed class UserId : AbstractIdentity<long>
+	[Serializable]
+	public sealed class UserId : AbstractIdentity<long>
     {
         private const long SystemId = long.MaxValue - 1;
 

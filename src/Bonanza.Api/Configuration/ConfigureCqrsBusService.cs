@@ -1,7 +1,9 @@
-﻿using Bonanza.Contracts.Commands;
+﻿using Bonanza.Api.Controllers;
+using Bonanza.Contracts.Commands;
 using Bonanza.Contracts.Events;
 using Bonanza.Contracts.ValueObjects.Tenant;
 using Bonanza.Domain.Aggregates;
+using Bonanza.Domain.Aggregates.TenantAggregate;
 using Bonanza.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,10 +16,11 @@ namespace Bonanza.Api.Configuration
 			this IServiceCollection services)
 		{
 			var bus = new FakeBus();
-			var storage = new EventStore(bus);
-			var rep = new Repository<Tenant, TenantId>(storage);
-			var bulshitDB = new BullShitDatabase();
-			var readModelFacade = new ReadModelFacade(bulshitDB);
+			var storage = new Storage.EventStore(bus);
+			//var rep = new Repository<Tenant, TenantId>(storage);
+
+			//var bulshitDB = new BullShitDatabase();
+			//var readModelFacade = new ReadModelFacade(bulshitDB);
 
 			var tenantCommandHandlers = new TenantCommandHandlers(rep, bulshitDB);
 

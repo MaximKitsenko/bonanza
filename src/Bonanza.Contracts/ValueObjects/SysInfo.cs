@@ -8,6 +8,7 @@ namespace Bonanza.Contracts.ValueObjects
 	/// <summary>
 	/// Needed to identify who sent the command
 	/// </summary>
+	[Serializable]
 	public class SysInfo : IEquatable<SysInfo>
 	{
 		public UserId UserId { get; }

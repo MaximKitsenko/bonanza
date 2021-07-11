@@ -5,6 +5,7 @@ using Bonanza.Infrastructure;
 
 namespace Bonanza.Contracts.Events
 {
+	[Serializable]
     public class TenantCreated : IEvent
     {
         public TenantId TenantId { get; }

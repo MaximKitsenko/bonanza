@@ -69,10 +69,10 @@ RETURNS int AS
 $$ -- here start procedural part
    DECLARE currentVer int;
    BEGIN
-		SELECT INTO currentVer COALESCE(MAX(version),-1)
+		SELECT INTO currentVer COALESCE(MAX(version),0)
 				FROM public.es_events
 				WHERE name = aggregateName;
-		IF expectedVersion <> -1 THEN
+		IF expectedVersion <> 0 THEN
 			IF currentVer <> expectedVersion THEN
 				RETURN currentVer;
 			END IF;
@@ -177,9 +177,9 @@ LANGUAGE plpgsql; -- language specification ";
                         LIMIT @take OFFSET 0";
 				using (var cmd = new NpgsqlCommand(sql, conn))
 				{
-					cmd.Parameters.AddWithValue("?name", name);
-					cmd.Parameters.AddWithValue("?version", afterVersion);
-					cmd.Parameters.AddWithValue("?take", maxCount);
+					cmd.Parameters.AddWithValue("@name", name);
+					cmd.Parameters.AddWithValue("@version", afterVersion);
+					cmd.Parameters.AddWithValue("@take", maxCount);
 					using (var reader = cmd.ExecuteReader())
 					{
 						while (reader.Read())
@@ -228,7 +228,30 @@ LANGUAGE plpgsql; -- language specification ";
 		[Obsolete]
 		public void Append(string name, byte[] data, long expectedVersion = -1)
 		{
-			throw new NotImplementedException();
+			if (_cacheConnection)
+			{
+				NpgsqlConnection conn = null;
+				try
+				{
+					conn = GetFromCacheOrNew();
+					_appendMethod(name, data, expectedVersion, conn);
+				}
+				finally
+				{
+					if (conn != null)
+					{
+						_connections.Enqueue(conn);
+					}
+				}
+			}
+			else
+			{
+				using (var conn = new NpgsqlConnection(_connectionString))
+				{
+					conn.Open();
+					_appendMethod(name, data, expectedVersion, conn);
+				}
+			}
 		}
 
 		public void Append2Phases(string name, byte[] data, long expectedVersion, NpgsqlConnection conn)

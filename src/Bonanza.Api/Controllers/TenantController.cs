@@ -84,6 +84,7 @@ namespace Bonanza.Api.Controllers
 	{
 		IEnumerable<TenantForListDto> GetTenants();
 		InventoryItemDetailsDto GetInventoryItemDetails(Guid id);
+		object GetInventoryItems();
 	}
 
 	public interface ICommandSender

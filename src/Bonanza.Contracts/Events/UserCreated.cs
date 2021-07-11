@@ -1,9 +1,11 @@
-﻿using Bonanza.Contracts.ValueObjects;
+﻿using System;
+using Bonanza.Contracts.ValueObjects;
 using Bonanza.Contracts.ValueObjects.Tenant;
 using Bonanza.Contracts.ValueObjects.User;
 
 namespace Bonanza.Contracts.Events
 {
+	[Serializable]
 	public class UserCreated
 	{
 		public TenantId TenantId { get; }

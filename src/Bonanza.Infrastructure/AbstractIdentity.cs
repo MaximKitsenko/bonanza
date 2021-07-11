@@ -2,6 +2,7 @@
 
 namespace Bonanza.Infrastructure
 {
+	[Serializable]
 	public abstract class AbstractIdentity<TKey> : IIdentity
 	{
 		internal protected const long BlankLongId = long.MaxValue;

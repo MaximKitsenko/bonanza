@@ -77,4 +77,21 @@ namespace Bonanza.Api.Controllers
 			return RedirectToAction("Index");
 		}
 	}
+
+	public class InventoryItemListDto
+	{
+	}
+
+	internal class FakeBus	
+	{
+		public void Send(RenameTenant command)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Send(CreateTenant command)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

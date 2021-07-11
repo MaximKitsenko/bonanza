@@ -50,10 +50,10 @@ namespace Bonanza.Domain.Aggregates.TenantAggregate
 				SysInfo.CreateSysInfo(id))
 			);
 
-			var bonus = service.GetWelcomeBonus();
+			//var bonus = service.GetWelcomeBonus();
 
-			if (bonus > 0)
-				AddPayment("Welcome bonus", bonus, utc);
+			//if (bonus > 0)
+			//	AddPayment("Welcome bonus", bonus, utc);
 		}
 
 		public void Rename(TenantName name, DateTime dateTime)
