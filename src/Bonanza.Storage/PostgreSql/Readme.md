@@ -73,6 +73,10 @@ view file: `less /var/lib/postgresql/data/postgresql.conf`
 
 https://dbfiddle.uk/?rdbms=postgres_13&fiddle=42dd48d82a48cd6afa941a63835d2b02
 
+## Tune DB
+
+https://dba.stackexchange.com/questions/212563/what-performance-advantages-does-append-only-postgres-allow
+
 ## ?
 
 Don't know why, but:
