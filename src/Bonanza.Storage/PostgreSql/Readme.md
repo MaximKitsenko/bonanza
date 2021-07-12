@@ -65,6 +65,24 @@ currently: `/var/lib/postgresql/data/postgresql.conf`
 
 view file: `less /var/lib/postgresql/data/postgresql.conf`
 
+## Backup db
+
+create dump:
+
+`pg_dump -p 5432 -h 172.20.0.3 -U root -W -d bonanza-test-db > dbexport.pgsql`
+
+or (for compressed file)
+
+`pg_dump -p 5432 -h 172.20.0.3 -U root -W -Fc -Z 6 -d bonanza-test-db > dbexport.dump`
+
+copy from container to host machine:
+
+`sudo docker cp 3f817b963d70:dbexport.dump  dbexport-copy.dump`
+
+copy from remote azure Vm to local path:
+
+`scp -i "E:\documents\Passwords\sshkeys-dev01\bonanza-dev01_key.pem" azurecat@20.102.99.1:~/dbexport-copy.dump dbexport-copy.dump`
+
 ## Restart | Start |Stop Postgres server
 
 /etc/init.d/postgresql {start|stop|restart|reload|force-reload|status}
